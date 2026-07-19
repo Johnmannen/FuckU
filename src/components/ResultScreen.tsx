@@ -394,9 +394,19 @@ export default function ResultScreen({ screamData, onSaveComplete, onScreamAgain
                 className={`w-full h-full object-cover transition-opacity duration-700 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
                 style={{
                   transform: isPlayingAudio 
-                    ? `translate(${(Math.random() - 0.5) * (playbackVolume * 0.18)}px, ${(Math.random() - 0.5) * (playbackVolume * 0.18)}px)` 
-                    : 'translate(0px, 0px)',
-                  transition: isPlayingAudio ? 'none' : 'transform 0.2s ease-out'
+                    ? `translate(${(Math.random() - 0.5) * (playbackVolume * 0.18)}px, ${(Math.random() - 0.5) * (playbackVolume * 0.18)}px)
+                       rotate(${(Math.random() - 0.5) * (playbackVolume * 0.05)}deg)
+                       scale(${1 + (playbackVolume * 0.0005)})
+                       scaleY(${1 + (playbackVolume * 0.0015)})`
+                    : 'translate(0px, 0px) rotate(0deg) scale(1) scaleY(1)',
+                  filter: isPlayingAudio
+                    ? `brightness(${1 + (playbackVolume * 0.008)})
+                       contrast(${1 + (playbackVolume * 0.004)})
+                       hue-rotate(${playbackVolume * 0.1}deg)
+                       ${playbackVolume > 70 ? `drop-shadow(${(Math.random() - 0.5) * 5}px 0px 2px rgba(255,0,0,0.5)) drop-shadow(${(Math.random() - 0.5) * -5}px 0px 2px rgba(0,255,255,0.5))` : ''}`
+                    : 'none',
+                  transformOrigin: 'top center', // Crucial for the jaw-drop effect
+                  transition: isPlayingAudio ? 'none' : 'transform 0.2s ease-out, filter 0.2s ease-out'
                 }}
                 id="generated-avatar-img"
               />

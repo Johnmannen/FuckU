@@ -62,7 +62,9 @@ export const FALLBACK_THEMES_500: ScreamFigure[] = (["Low", "Mid", "High"] as co
     const duration = [0, 2, 5][i % 3] as 0 | 2 | 5;
     const adj = adjs[Math.floor(i / (themeKeys.length * subjectList.length)) % adjs.length] || adjs[i % adjs.length];
 
-    const prompt = `Masterpiece, 8k, highly detailed, photorealistic, cinematic lighting, intricate textures, v-ray render. A ${style} portrayal of a ${adj} ${subject} emerging from a ${theme} realm. The essence of a ${intensityGroup.toLowerCase()} intensity scream captured in frozen motion, ${intensityDesc}. --no pokemon, cartoon, anime, chibi, childish, flat colors`;
+    const screamKeywords = ["screaming", "roaring", "wide-open mouth"];
+    const screamKeyword = screamKeywords[i % screamKeywords.length];
+    const prompt = `Masterpiece, 8k, highly detailed, photorealistic, cinematic lighting, intricate textures, v-ray render. A ${style} portrayal of a ${adj} ${subject} ${screamKeyword} while emerging from a ${theme} realm. The essence of a ${intensityGroup.toLowerCase()} intensity scream captured in frozen motion, ${intensityDesc}. --no pokemon, cartoon, anime, chibi, childish, flat colors`;
 
     const analysisEn = `A ${adj.toLowerCase()} ${subject.toLowerCase()} manifested from the ${theme.toLowerCase()} domain, vibrating with the poetic and raw energy of a ${intensityGroup.toLowerCase()} intensity scream. It stands as a testament to the ${intensityGroup === "High" ? "unrelenting power" : (intensityGroup === "Mid" ? "vibrant resonance" : "subtle whisper")} of its origin.`;
 

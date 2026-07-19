@@ -93,7 +93,7 @@ Map the scream's physical metrics to the character:
   * Mid intensity (30% - 65%): active, battle-ready, mischievous, mechanical, or representing emerald earth, autumn wind, deep rocks, or green spirit flames.
   * High intensity (> 65%): absolutely furious, explosive, divine, thunderous, or representing lightning, molten lava, cosmic supernova, or glowing solar energy.
 
-Provide a highly detailed prompt for an image generator. Be very specific and unique! Add '--no pokemon, cartoon, anime, chibi, childish, flat colors' at the end of every prompt.`;
+Provide a highly detailed prompt for an image generator. Be very specific and unique! The creature/entity MUST be in a 'screaming' or 'roaring' pose with its mouth wide open, capturing the raw energy of the sound. Add '--no pokemon, cartoon, anime, chibi, childish, flat colors' at the end of every prompt.`;
 
     const response = await ai.models.generateContent({
       model: "gemini-3.5-flash",

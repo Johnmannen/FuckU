@@ -164,15 +164,14 @@ export default function StartScreen({ onScreamRecorded, onNavigateToGallery }: S
           'gritty charcoal and ink sketch'
         ];
 
-        // Randomly pick to ensure uniqueness even for same intensity/duration
         const randomArchetype = archetypes[Math.floor(Math.random() * archetypes.length)];
         const randomStyle = styles[Math.floor(Math.random() * styles.length)];
 
-        let characterType = `A ${randomArchetype}`;
+        let characterType = `A screaming ${randomArchetype.toLowerCase()}`;
         if (finalDuration >= 2 && finalDuration <= 4) {
-          characterType = `A formidable ${randomArchetype.toLowerCase()}`;
+          characterType = `A formidable screaming ${randomArchetype.toLowerCase()}`;
         } else if (finalDuration > 4) {
-          characterType = `A colossal and ancient ${randomArchetype.toLowerCase()}`;
+          characterType = `A colossal and ancient screaming ${randomArchetype.toLowerCase()}`;
         }
 
         let intensityAdjective = 'whispering and subtle';
@@ -182,7 +181,7 @@ export default function StartScreen({ onScreamRecorded, onNavigateToGallery }: S
           intensityAdjective = 'explosive and world-shattering';
         }
 
-        const completePrompt = `Masterpiece, 8k, highly detailed, photorealistic, cinematic lighting, intricate textures. ${characterType}, ${intensityAdjective}, in the style of ${randomStyle}. Dark atmospheric background, epic composition. --no pokemon, cartoon, anime, chibi, childish, flat colors`;
+        const completePrompt = `Masterpiece, 8k, highly detailed, photorealistic, cinematic lighting, intricate textures. ${characterType} with a wide-open mouth letting out a powerful vocal release, ${intensityAdjective}, in the style of ${randomStyle}. Dark atmospheric background, epic composition. --no pokemon, cartoon, anime, chibi, childish, flat colors`;
 
         onScreamRecorded({
           duration: Number(finalDuration.toFixed(2)),
