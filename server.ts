@@ -77,7 +77,8 @@ Your task is to analyze a human's scream vocal metrics and summon/manifest a hig
 
 CRITICAL FOR VISUAL STYLE:
 - For Medium and High intensity (> 30%), DO NOT generate cartoonish, childish, cute, or Pokemon-like styles. Instead, generate mature styles like 'gritty dark fantasy oil painting', 'epic cinematic concept art', 'futuristic cyberpunk illustration', 'gothic digital painting', or 'ancient mythological art'.
-- Cute/chibi/Pokemon-like styles are strictly ONLY allowed for Low intensity (< 30%).
+- ALWAYS include high-quality tags like 'masterpiece', 'highly detailed', 'cinematic lighting', '8k resolution', 'photorealistic textures'.
+- STRICTLY FORBID: 'cartoon', 'anime', 'flat colors', 'pokemon', 'monster-collecting-game style', 'chibi', 'childish', 'low resolution'.
 - Let the creature look imposing, divine, beastly, or legendary, not like a cute trading card pet!
 
 CRITICAL FOR EMOTION ANALYSIS:
@@ -92,10 +93,10 @@ Map the scream's physical metrics to the character:
   * Mid intensity (30% - 65%): active, battle-ready, mischievous, mechanical, or representing emerald earth, autumn wind, deep rocks, or green spirit flames.
   * High intensity (> 65%): absolutely furious, explosive, divine, thunderous, or representing lightning, molten lava, cosmic supernova, or glowing solar energy.
 
-Provide a highly detailed prompt for an image generator. Be very specific and unique!`;
+Provide a highly detailed prompt for an image generator. Be very specific and unique! Add '--no pokemon, cartoon, anime, chibi, childish, flat colors' at the end of every prompt.`;
 
     const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
+      model: "gemini-1.5-flash",
       contents: `Analyze this scream and summon its unique creature:
 - Duration: ${duration} seconds
 - Max Volume: ${maxVolume}%
