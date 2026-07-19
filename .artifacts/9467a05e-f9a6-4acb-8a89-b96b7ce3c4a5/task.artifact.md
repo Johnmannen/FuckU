@@ -1,8 +1,6 @@
-- `[x]` Implementera Dynamiska "Skrik"-visualiseringar
-  - `[x]` Uppdatera `StartScreen.tsx` (Scream prompts)
-  - `[x]` Uppdatera `server.ts` (AI-instruktioner)
-  - `[x]` Uppdatera `fallbacks.ts` (500+ figurer med skrik-tema)
-  - `[x]` Implementera "Jaw Drop" och ljuseffekter i `ResultScreen.tsx`
-- `[/]` Uppdatera GitHub och Vercel
-  - `[x]` Commit och Push
-  - `[ ]` Verifiera live deployment
+- `[x]` Installera Capacitor och Android-plattform
+- `[x]` Konfigurera `capacitor.config.ts`
+- `[x]` Lägg till Android-rättigheter (Mikrofon, Internet) i `AndroidManifest.xml`
+- `[x]` Anpassa API-anrop för mobil (Absolute URLs)
+- `[ ]` Skapa ikoner och Splash screen (Valfritt men rekommenderat)
+- `[ ]` Bygg och verifiera i Android Studio

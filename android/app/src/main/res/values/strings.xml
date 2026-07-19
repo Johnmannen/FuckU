@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">FuckU</string>
+    <string name="title_activity_main">FuckU</string>
+    <string name="package_name">com.johnmannen.screamapp</string>
+    <string name="custom_url_scheme">com.johnmannen.screamapp</string>
+</resources>

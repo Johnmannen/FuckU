@@ -4,6 +4,7 @@ import { Play, Square, Save, RefreshCw, Sparkles, Volume2, Calendar, Clock, Chev
 import { ScreamRecord, UserProfile } from '../types';
 import { saveScream } from '../lib/storage';
 import { downloadImage } from '../lib/download';
+import { API_ENDPOINTS } from '../lib/api';
 import ShareModal from './ShareModal';
 
 interface ResultScreenProps {
@@ -141,7 +142,7 @@ export default function ResultScreen({ screamData, user, onSaveComplete, onScrea
 
     const userLang = navigator.language || 'en';
 
-    fetch('/api/analyze-scream', {
+    fetch(API_ENDPOINTS.analyzeScream, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

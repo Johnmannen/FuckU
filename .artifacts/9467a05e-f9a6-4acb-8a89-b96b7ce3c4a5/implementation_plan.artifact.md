@@ -1,36 +1,49 @@
-# Plan: Hybrid-inloggning (Firebase), Molnlagring och Bildnedladdning
+# Plan: Publicera på Google Play Store
 
-Vi ska bygga ett system som tillåter anonym användning men uppmuntrar till inloggning för att säkra sina skrik i molnet. Vi lägger även till möjligheten att spara bilderna till enhetens galleri.
+För att förvandla din webbapp till en riktig Android-app som kan laddas ner från Google Play Store använder vi ett verktyg som heter **Capacitor**. Det "paketerar" din React-hemsida till en app-behållare som kan köras på mobiler.
+
+## Förutsättningar
+- Ett **Google Play Developer Account** (kostar ca $25 som en engångsavgift till Google).
+- **Android Studio** installerat på din dator.
 
 ## Proposed Changes
 
-### 1. Firebase Konfiguration
-- **[NEW] [firebase.ts](file:///C:/Users/johnr/StudioProjects/FuckU/src/lib/firebase.ts)**: Initiera Firebase Auth och Firestore. Vi använder miljövariabler för konfigurationen.
+### 1. Installera Capacitor
+Vi lägger till Capacitor i ditt projekt för att hantera kopplingen till Android.
+- Installera `@capacitor/core`, `@capacitor/cli` och `@capacitor/android`.
+- Initiera Capacitor med ett unikt paketnamn (t.ex. `com.johnmannen.screamapp`).
 
-### 2. Nedladdningsfunktion (Spara till galleri)
-- **[NEW] [download.ts](file:///C:/Users/johnr/StudioProjects/FuckU/src/lib/download.ts)**: En hjälpfunktion som hämtar en bild via URL och triggar en nerladdning.
-- **[MODIFY] [ResultScreen.tsx](file:///C:/Users/johnr/StudioProjects/FuckU/src/components/ResultScreen.tsx)**: Lägg till en "Ladda ner"-knapp (ikon) bredvid "Spara".
+### 2. Anpassa Koden för Mobil
+Vissa saker i en webbläsare fungerar annorlunda i en installerad app.
+- **Backend-anrop:** Vi måste se till att appen pratar med din Vercel-länk istället för `localhost`.
+- **Mobil-anpassningar:** Justera eventuella knappar eller menyer som känns "webbiga" så att de känns som en riktig app.
 
-### 3. Hybrid-Storage System
-- **[MODIFY] [storage.ts](file:///C:/Users/johnr/StudioProjects/FuckU/src/lib/storage.ts)**: Skapa en brygga:
-    - `saveScream`: Sparar lokalt i IndexedDB om utloggad, i Firestore om inloggad.
-    - `getAllScreams`: Slår ihop lokala skrik med molnskrik.
-- **[MODIFY] [App.tsx](file:///C:/Users/johnr/StudioProjects/FuckU/src/App.tsx)**: Hantera Auth-state globalt och skicka ner användarinformation till skärmarna.
+### 3. Byggprocessen
+Vi skapar de filer som Google Play kräver.
+1.  Kör `npm run build` för att skapa den senaste versionen av din webbkod.
+2.  Kör `npx cap sync` för att kopiera in koden i Android-projektet.
+3.  Öppna projektet i Android Studio.
 
-### 4. Auth-gränssnitt
-- **[NEW] [AuthModal.tsx](file:///C:/Users/johnr/StudioProjects/FuckU/src/components/AuthModal.tsx)**: En modal som erbjuder inloggning med Google/Facebook. Visas när man klickar på en ny profil-ikon eller försöker dela ett monster.
-- **[MODIFY] [GalleryScreen.tsx](file:///C:/Users/johnr/StudioProjects/FuckU/src/components/GalleryScreen.tsx)**: Lägg till inloggnings-status och en knapp för att synka lokala monster till molnet.
+### 4. Skapa en "Signed App Bundle" (AAB)
+Detta görs i Android Studio:
+- Skapa en digital signatur (Keystore).
+- Bygg en `.aab`-fil som är det format Google Play vill ha.
+
+### 5. Publicering i Google Play Console
+- Skapa en ny app i Play Console.
+- Ladda upp din `.aab`-fil.
+- Fyll i beskrivning, lägg till skärmbilder och välj åldersgräns.
+- Skicka in för granskning (tar oftast några dagar första gången).
 
 ## User Review Required
 
 > [!IMPORTANT]
-> **Firebase Setup:** Du måste skapa ett projekt på [Firebase Console](https://console.firebase.google.com/), aktivera "Google" och "Facebook" under Authentication, och aktivera "Cloud Firestore".
-> **Konfigurationsdata:** Jag kommer skapa en fil där du behöver klistra in dina Firebase-nycklar (liknande hur vi gjorde med Gemini).
+> **Backend-servern:** Din Express-backend (`server.ts`) kommer fortfarande att köras på Vercel. Android-appen kommer att fungera som en "klient" som ringer till Vercel för att få sina monster.
+> **Google Play-avgift:** Kom ihåg att Google tar ut en engångsavgift på $25 för att få öppna ett utvecklarkonto.
 
 ## Verification Plan
 
 ### Manual Verification
-1. Verifiera att "Ladda ner"-knappen sparar en bild till telefonen.
-2. Testa att spara ett monster som gäst.
-3. Logga in med Google och verifiera att nästa monster sparas i molnet (Firestore).
-4. Kontrollera att utloggning tar en tillbaka till gästläge men att molnmonstren döljs.
+- Kör appen i en Android-emulator eller på en fysisk telefon via Android Studio.
+- Kontrollera att mikrofonen och inloggningen fungerar inuti app-behållaren.
+- Verifiera att nerladdningsfunktionen fungerar korrekt på Android.

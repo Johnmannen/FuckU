@@ -1,38 +1,40 @@
-# Slutfört: Inloggning och Bildnedladdning
+# Förberedd för Google Play Store (Android)
 
-Appen har nu stöd för både molnlagring (via Google/Facebook) och möjligheten att spara monsterbilder direkt till din telefon.
+Jag har nu installerat och konfigurerat **Capacitor**, vilket gör att du kan köra din FuckU-app som en riktig Android-app.
 
-## Nya funktioner
+## Vad som har gjorts
 
-### 1. Hybrid-lagring (Moln + Lokal)
-- **Gästläge:** Om du inte är inloggad sparas monstren som vanligt bara i din webbläsare.
-- **Inloggat läge:** Genom att logga in med Google eller Facebook sparas dina monster i Firebase Firestore. Det betyder att de aldrig försvinner, även om du byter telefon eller rensar webbläsaren.
-- **Automatisk Synk:** När du loggar in för första gången försöker appen automatiskt flytta dina befintliga lokala monster till ditt molnkonto.
+### 1. Capacitor-installation
+- Installerat `@capacitor/core`, `@capacitor/cli` och `@capacitor/android`.
+- Skapat en `capacitor.config.ts` med paket-ID: `com.johnmannen.screamapp`.
 
-### 2. Spara till Galleri
-- Jag har lagt till en **"Ladda ner"**-knapp (pil-ikon) i både resultatskärmen och galleriet.
-- När du klickar på den sparas monsterbilden direkt i din telefons bildbibliotek eller mapp för hämtade filer.
+### 2. Android-plattform
+- Skapat mappen `android/` som innehåller det färdiga Android Studio-projektet.
+- Uppdaterat `AndroidManifest.xml` med nödvändiga rättigheter:
+    - **RECORD_AUDIO**: För att kunna spela in dina skrik.
+    - **INTERNET**: För att prata med Gemini AI på Vercel.
+    - **STORAGE**: För att kunna ladda ner dina monsterbilder till galleriet.
 
-### 3. Inloggnings-gränssnitt
-- Det finns nu en profil-ikon längst upp till vänster på startskärmen.
-- Klicka på den för att logga in eller se din status.
+### 3. Mobil-anpassad API-logik
+- Skapat `src/lib/api.ts` som automatiskt väljer rätt URL.
+- När appen körs i din telefon kommer den nu att anropa din Vercel-server istället för att försöka hitta en lokal server inuti mobilen.
 
-## Viktigt: Konfiguration krävs
-För att inloggningen ska fungera på din live-länk behöver du göra följande i **Firebase Console**:
+## Så här testar du appen nu
 
-1.  **Skapa projekt:** Gå till [Firebase Console](https://console.firebase.google.com/) och skapa ett projekt som heter "ScreamApp" (eller valfritt namn).
-2.  **Aktivera Auth:** Under "Authentication" -> "Sign-in method", aktivera **Google** och **Facebook**.
-3.  **Skapa Databas:** Under "Firestore Database", klicka på "Create database" och välj "Start in test mode" (för enkelhetens skull just nu).
-4.  **Hämta nycklar:** Klicka på kugghjulet (Project Settings) -> "General" -> "Your apps" och lägg till en "Web App". Kopiera nycklarna du får.
+1.  **Öppna Android Studio:**
+    Kör kommandot: `npx cap open android` (eller klicka på "Open" i Android Studio-menyn och välj mappen `android`).
+2.  **Kör på telefonen:**
+    Koppla in din Android-telefon med USB och klicka på den gröna "Play"-knappen i Android Studio.
+3.  **Synka ändringar:**
+    Om du ändrar något i din React-kod, kör följande för att uppdatera appen:
+    ```bash
+    npm run build
+    npx cap sync
+    ```
 
-### Lägg in nycklarna i Vercel
-Gå till ditt projekt i Vercel -> **Settings** -> **Environment Variables** och lägg till dessa (med värdena från Firebase):
-- `VITE_FIREBASE_API_KEY`
-- `VITE_FIREBASE_AUTH_DOMAIN`
-- `VITE_FIREBASE_PROJECT_ID`
-- `VITE_FIREBASE_STORAGE_BUCKET`
-- `VITE_FIREBASE_MESSAGING_SENDER_ID`
-- `VITE_FIREBASE_APP_ID`
+> [!IMPORTANT]
+> **Vercel URL:** Just nu pekar mobilappen på en exempel-URL (`fucku-six.vercel.app`). Du bör lägga till din riktiga länk i `.env.local` som `VITE_API_BASE_URL=din-riktiga-länk.vercel.app` och köra en ny build för att det ska fungera på din telefon.
 
-## Nästa steg
-Jag har skickat upp all kod till GitHub. När du har lagt in variablerna i Vercel (och din `.env.local` om du vill testa på datorn) kommer inloggningen att aktiveras automatiskt!
+## Nästa steg för Google Play
+- **Ikoner:** Du bör byta ut standard-ikonerna i `android/app/src/main/res/`.
+- **Signed Bundle:** När du är nöjd, välj **Build > Generate Signed Bundle / APK** i Android Studio för att skapa filen till Google Play Console.
