@@ -1,0 +1,7 @@
+- `[/]` Förbered för Vercel deployment
+  - `[x]` Skapa `api/` mapp
+  - `[ ]` Skapa `api/index.ts` (entry point för Vercel)
+  - `[ ]` Modifiera `server.ts` (export och cleanup)
+  - `[ ]` Skapa `vercel.json`
+  - `[ ]` Verifiera bygget lokalt
+- `[ ]` Slutför och förbered för Git push

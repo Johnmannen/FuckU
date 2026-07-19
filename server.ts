@@ -3,6 +3,7 @@ import path from "path";
 import dotenv from "dotenv";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI, Type } from "@google/genai";
+import { FALLBACK_THEMES_500 } from "./fallbacks";
 
 // Load environment variables in development
 dotenv.config();
@@ -12,111 +13,27 @@ const PORT = 3000;
 
 app.use(express.json({ limit: "10mb" }));
 
-// Fallback pool of highly creative, diverse, and randomized characters
-const FALLBACK_THEMES = [
-  // Low Intensity (Timid, soft, gentle, whispering, sleepy, cute)
-  {
-    minIntensity: 0,
-    maxIntensity: 30,
-    options: [
-      {
-        title: "Koko, the Fluffy Sleepy Sloth",
-        characterType: "Cute Ghibli-style forest creature",
-        characterStyle: "Soft watercolor, cozy pastel tones, dreamy Ghibli aesthetic",
-        prompt: "A cute fluffy sleepy sloth hanging from a tree branch, Ghibli-style watercolor illustration, soft pastel colors, dreamy whimsical lighting, green leaves, cozy forest background, adorable round face",
-        analysisEn: "A soft, quiet whisper in the dark. It conveys a soothing, restful energy filled with dreamy innocence and gentle patience.",
-        analysisSv: "Ett mjukt, försiktigt viskande i mörkret. Det förmedlar en lugnande och vilsam energi fylld med drömsk oskuldsfullhet och stilla tålamod."
-      },
-      {
-        title: "Selene, the Starry Mew Kitten",
-        characterType: "Anime celestial kitten spirit",
-        characterStyle: "Sparkling anime style, cosmic dark blue tones, starry night sky",
-        prompt: "An adorable celestial kitten with glowing starry eyes and cosmic blue fur, floating stardust, crescent moon in background, gorgeous anime style, cute fantasy illustration",
-        analysisEn: "A celestial hum from the depths of space, carrying a dreamlike wonder and galactic peacefulness.",
-        analysisSv: "Ett celestialt nynnande från rymdens djup, som bär på en drömsk förundran och galaktisk fridfullhet."
-      },
-      {
-        title: "Grootlet, the Emerald Sapling",
-        characterType: "Chibi woodland nature spirit",
-        characterStyle: "Lush digital illustration, vibrant emerald and earthy tones",
-        prompt: "A tiny cute tree-spirit seedling with glowing green leaf-hair, whispering softly, high-detailed digital illustration, cinematic lighting, mossy forest floor background, soft bokeh",
-        analysisEn: "A quiet sigh of growth and gentle nature energy, representing ancient roots starting to awaken slowly.",
-        analysisSv: "En tyst suck av tillväxt och mild naturkraft, som representerar uråldriga rötter som sakta börjar vakna."
-      }
-    ]
-  },
-  // Mid Intensity (Active, fierce, battle-ready, playful, elemental, mechanical)
-  {
-    minIntensity: 30,
-    maxIntensity: 65,
-    options: [
-      {
-        title: "Anubis, Guardian of the Scale",
-        characterType: "Ancient Egyptian Mythic Deity",
-        characterStyle: "Gothic dynamic digital art, gold and obsidian textures",
-        prompt: "The jackal-headed god Anubis standing majestically, ancient Egyptian theme, gold and black obsidian armor, glowing blue eyes, epic cinematic digital painting, volumetric lighting, hieroglyphics on stone walls",
-        analysisEn: "A focused, solemn tone filled with quiet determination. It reflects an inner judge ready to confront challenges with absolute balance.",
-        analysisSv: "En fokuserad, högtidlig ton fylld av tyst beslutsamhet. Den speglar en inre dömande kraft som är redo att möta utmaningar med absolut balans."
-      },
-      {
-        title: "Valbrand, the Fire-Forged Viking",
-        characterType: "Legendary Norse Warrior Spirit",
-        characterStyle: "Realistic gritty fantasy art, dark amber flames",
-        prompt: "A roaring Norse Viking warrior with a beard made of embers, realistic gritty fantasy style, iron helmet, glowing orange flames, snowy dark pine forest background, cinematic atmospheric lighting",
-        analysisEn: "A warm, spirited outcry of resilience. This reflects an unyielding warrior spirit ready to break through icy obstacles.",
-        analysisSv: "Ett varmt, eldigt utbrott av motståndskraft. Detta återspeglar en okuvlig krigaranda redo att bryta igenom isiga hinder."
-      },
-      {
-        title: "Giga-Volt, the Steamwork Golem",
-        characterType: "Sleek steampunk mechanical soldier",
-        characterStyle: "Industrial concept art, brass and copper highlights, electric sparks",
-        prompt: "A brass mechanical golem with glowing electrical copper coils, steampunk aesthetic, electric sparks crackling, industrial dark workshop background, high detail metal textures, 3D render style",
-        analysisEn: "An intense, structured burst of kinetic steam power. It reveals structured mental activity breaking through tension.",
-        analysisSv: "En intensiv, strukturerad stöt av kinetisk ångkraft. Den avslöjar en organiserad mental aktivitet som bryter igenom spänningar."
-      }
-    ]
-  },
-  // High Intensity (Furious, thunderous, legendary, celestial, explosive)
-  {
-    minIntensity: 65,
-    maxIntensity: 100,
-    options: [
-      {
-        title: "Zeus, Lord of Storms",
-        characterType: "Greek Olympian God of Thunder",
-        characterStyle: "Epic high-fantasy illustration, bright neon lightning, dramatic pose",
-        prompt: "Zeus, the king of gods, roaring in extreme fury with eyes of pure lightning, holding a crackling thunderbolt, epic high-fantasy digital painting, dramatic low angle, dark stormy clouds background, neon blue electrical sparks",
-        analysisEn: "A monumental primal roar filled with explosive fury. This scream releases deep-seated tension in a thunderous cosmic cascade.",
-        analysisSv: "Ett monumentalt primalvrål fyllt av explosiv vrede. Detta skrik frigör djupgående spänningar i en dundrande kosmisk kaskad."
-      },
-      {
-        title: "Ignis, the Obsidian Phoenix",
-        characterType: "Colossal molten fire bird",
-        characterStyle: "Cinematic dark fantasy art, molten lava and volcanic ash",
-        prompt: "A colossal phoenix bird made of pure molten lava and dark ash feathers, roaring as it spreads its wings, cinematic dark fantasy concept art, volcanic background, deep dramatic shadows, intense warm embers",
-        analysisEn: "A blazing rebirth. The sheer power of this vocal release represents burning away old stresses to rise stronger from the ashes.",
-        analysisSv: "En flammande återfödelse. Den rena kraften i detta vokala utlopp representerar att bränna bort gamla spänningar för att resa sig starkare ur askan."
-      },
-      {
-        title: "Ryujin, the Supernova Star Dragon",
-        characterType: "Cosmic stellar serpent deity",
-        characterStyle: "Epic cosmic sci-fi fantasy, stellar neon nebulas",
-        prompt: "A massive celestial dragon coiling through a stellar nebula, screaming a solar flare, epic sci-fi fantasy digital art, deep space background, glowing neon red and yellow stars, cinematic scale",
-        analysisEn: "A stellar shockwave screaming across the cosmos. It indicates a highly dramatic release of raw, uncontained emotional energy.",
-        analysisSv: "En färgstark chockvåg som skriker genom kosmos. Den indikerar en extremt dramatisk frigörelse av rå, gränslös känslomässig energi."
-      }
-    ]
-  }
-];
-
-// Helper to choose a local fallback character
-function getLocalFallback(intensity: number, isSv: boolean): { title: string; characterType: string; characterStyle: string; prompt: string; analysis: string } {
-  const matchingRange = FALLBACK_THEMES.find(
+// Helper to choose a local fallback character from the 500+ library
+function getLocalFallback(intensity: number, duration: number, isSv: boolean): { title: string; characterType: string; characterStyle: string; prompt: string; analysis: string } {
+  // Filter by intensity range
+  const matchingIntensity = FALLBACK_THEMES_500.filter(
     (t) => intensity >= t.minIntensity && intensity <= t.maxIntensity
-  ) || FALLBACK_THEMES[1]; // default to mid range
+  );
 
-  const randomIndex = Math.floor(Math.random() * matchingRange.options.length);
-  const selected = matchingRange.options[randomIndex];
+  // Further filter by duration weighting
+  // duration < 1.5 -> 0 (short)
+  // 1.5 <= duration < 4.5 -> 2 (medium)
+  // duration >= 4.5 -> 5 (long)
+  const durWeight = duration < 1.5 ? 0 : (duration < 4.5 ? 2 : 5);
+  let finalOptions = matchingIntensity.filter(t => t.minDuration === durWeight);
+
+  // Fallback to just intensity if no perfect duration match
+  if (finalOptions.length === 0) finalOptions = matchingIntensity;
+  if (finalOptions.length === 0) finalOptions = [FALLBACK_THEMES_500[0]];
+
+  const randomIndex = Math.floor(Math.random() * finalOptions.length);
+  const selected = finalOptions[randomIndex];
+
   return {
     title: selected.title,
     characterType: selected.characterType,
@@ -139,7 +56,7 @@ app.post("/api/analyze-scream", async (req, res) => {
   // Check if GEMINI_API_KEY exists
   if (!process.env.GEMINI_API_KEY) {
     console.log("GEMINI_API_KEY not configured. Falling back to creative local database.");
-    const fallback = getLocalFallback(intensity, isSv);
+    const fallback = getLocalFallback(intensity, duration, isSv);
     return res.json(fallback);
   }
 
@@ -227,7 +144,7 @@ Provide a highly detailed prompt for an image generator. Be very specific and un
   } catch (error) {
     console.error("Gemini analysis error:", error);
     // Graceful fallback on error
-    const fallback = getLocalFallback(intensity, isSv);
+    const fallback = getLocalFallback(intensity, duration, isSv);
     return res.json(fallback);
   }
 });
@@ -253,4 +170,8 @@ async function startServer() {
   });
 }
 
-startServer();
+if (process.env.NODE_ENV !== "production" && !process.env.VERCEL) {
+  startServer();
+}
+
+export default app;
