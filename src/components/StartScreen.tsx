@@ -1,14 +1,16 @@
 import { useState, useRef, useEffect, SyntheticEvent } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { History, Mic, AlertCircle } from 'lucide-react';
-import { ScreamRecord } from '../types';
+import { History, Mic, AlertCircle, LogIn, User } from 'lucide-react';
+import { ScreamRecord, UserProfile } from '../types';
 
 interface StartScreenProps {
+  user: UserProfile | null;
   onScreamRecorded: (scream: Omit<ScreamRecord, 'id' | 'imageUrl' | 'timestamp'> & { audioBlob: Blob }) => void;
   onNavigateToGallery: () => void;
+  onLoginClick: () => void;
 }
 
-export default function StartScreen({ onScreamRecorded, onNavigateToGallery }: StartScreenProps) {
+export default function StartScreen({ user, onScreamRecorded, onNavigateToGallery, onLoginClick }: StartScreenProps) {
   const [isRecording, setIsRecording] = useState(false);
   const [permissionError, setPermissionError] = useState<string | null>(null);
   const [realtimeVolume, setRealtimeVolume] = useState(0);
@@ -366,6 +368,18 @@ export default function StartScreen({ onScreamRecorded, onNavigateToGallery }: S
 
       {/* Top Navigation Row */}
       <nav className="w-full max-w-4xl p-4 flex justify-between items-center z-20" id="header-row">
+        <button
+          onClick={onLoginClick}
+          className="w-12 h-12 rounded-2xl bg-[#1A1A1A] border border-neutral-800 flex items-center justify-center hover:bg-[#252525] transition-all text-neutral-200 hover:text-white cursor-pointer shadow-lg overflow-hidden"
+          title={user ? `Inloggad som ${user.displayName}` : "Logga in"}
+        >
+          {user ? (
+            user.photoURL ? <img src={user.photoURL} alt="" className="w-full h-full object-cover" /> : <User className="w-5 h-5 text-red-500" />
+          ) : (
+            <LogIn className="w-5 h-5 text-neutral-400" />
+          )}
+        </button>
+
         <div className="flex items-center gap-3" id="logo-badge">
           <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center">
             <div className="w-4 h-4 bg-white rounded-sm transform rotate-45"></div>

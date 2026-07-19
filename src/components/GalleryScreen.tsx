@@ -1,15 +1,19 @@
 import { useState, useEffect, useRef, MouseEvent } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ArrowLeft, Trash2, Play, Square, Volume2, Calendar, Clock, Sparkles, AlertTriangle, ShieldAlert, Share2 } from 'lucide-react';
-import { ScreamRecord } from '../types';
+import { ArrowLeft, Trash2, Play, Square, Volume2, Calendar, Clock, Sparkles, AlertTriangle, ShieldAlert, Share2, Download, LogIn, LogOut, User } from 'lucide-react';
+import { ScreamRecord, UserProfile } from '../types';
 import { getAllScreams, deleteScream } from '../lib/storage';
+import { downloadImage } from '../lib/download';
+import { auth } from '../lib/firebase';
 import ShareModal from './ShareModal';
 
 interface GalleryScreenProps {
+  user: UserProfile | null;
   onBackToStart: () => void;
+  onLoginClick: () => void;
 }
 
-export default function GalleryScreen({ onBackToStart }: GalleryScreenProps) {
+export default function GalleryScreen({ user, onBackToStart, onLoginClick }: GalleryScreenProps) {
   const [screams, setScreams] = useState<ScreamRecord[]>([]);
   const [loading, setLoading] = useState(true);
   
@@ -34,7 +38,7 @@ export default function GalleryScreen({ onBackToStart }: GalleryScreenProps) {
   const fetchScreams = async () => {
     setLoading(true);
     try {
-      const list = await getAllScreams();
+      const list = await getAllScreams(user?.uid);
       setScreams(list);
     } catch (err) {
       console.error('Failed to retrieve gallery screams:', err);
@@ -204,7 +208,7 @@ export default function GalleryScreen({ onBackToStart }: GalleryScreenProps) {
     }
 
     try {
-      await deleteScream(deleteCandidateId);
+      await deleteScream(deleteCandidateId, user?.uid);
       // Refresh screen list
       setScreams(prev => prev.filter(s => s.id !== deleteCandidateId));
     } catch (err) {
@@ -245,10 +249,27 @@ export default function GalleryScreen({ onBackToStart }: GalleryScreenProps) {
         </button>
 
         <h1 className="font-display font-black uppercase text-xl tracking-tighter text-white" id="gallery-title">
-          Monster Sanctuary
+          Sanctuary
         </h1>
 
-        <div className="w-[104px] sm:block hidden"></div>
+        <button
+          onClick={user ? () => auth.signOut() : onLoginClick}
+          className="flex items-center gap-2 px-3 py-2 bg-[#1A1A1A] border border-white/5 rounded-2xl hover:bg-[#252525] transition-all"
+        >
+          {user ? (
+            <>
+              <div className="w-5 h-5 rounded-full overflow-hidden border border-red-500/50">
+                {user.photoURL ? <img src={user.photoURL} alt="" /> : <User className="w-full h-full p-1 text-red-500" />}
+              </div>
+              <LogOut className="w-3.5 h-3.5 text-neutral-500" />
+            </>
+          ) : (
+            <>
+              <LogIn className="w-3.5 h-3.5 text-red-500" />
+              <span className="text-[10px] font-black uppercase text-neutral-300">Logga in</span>
+            </>
+          )}
+        </button>
       </div>
 
       {/* Main Gallery List */}
@@ -376,6 +397,16 @@ export default function GalleryScreen({ onBackToStart }: GalleryScreenProps) {
                     id={`btn-share-${record.id}`}
                   >
                     <Share2 className="w-3.5 h-3.5 text-red-500" />
+                  </button>
+
+                  {/* Download Button */}
+                  <button
+                    onClick={() => downloadImage(record.imageUrl, record.title)}
+                    className="w-9 h-9 rounded-full flex items-center justify-center bg-[#181818] border border-white/10 text-neutral-300 hover:text-white hover:border-red-500 transition-all cursor-pointer"
+                    title="Ladda ner bild"
+                    id={`btn-dl-${record.id}`}
+                  >
+                    <Download className="w-3.5 h-3.5 text-neutral-500" />
                   </button>
 
                   {/* Delete Button */}

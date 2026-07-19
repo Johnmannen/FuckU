@@ -1,32 +1,36 @@
-# Plan för publicering på Vercel
+# Plan: Hybrid-inloggning (Firebase), Molnlagring och Bildnedladdning
 
-Vi ska förbereda appen så att den kan köras på Vercel. Eftersom appen har både en frontend (React/Vite) och en backend (Express), behöver vi konfigurera Vercel att hantera båda.
+Vi ska bygga ett system som tillåter anonym användning men uppmuntrar till inloggning för att säkra sina skrik i molnet. Vi lägger även till möjligheten att spara bilderna till enhetens galleri.
 
 ## Proposed Changes
 
-### Backend-anpassning
-Vi flyttar API-logiken till en struktur som Vercel förstår (Serverless Functions).
+### 1. Firebase Konfiguration
+- **[NEW] [firebase.ts](file:///C:/Users/johnr/StudioProjects/FuckU/src/lib/firebase.ts)**: Initiera Firebase Auth och Firestore. Vi använder miljövariabler för konfigurationen.
 
-#### [NEW] [index.ts](file:///C:/Users/johnr/StudioProjects/FuckU/api/index.ts)
-Vi skapar en ny fil i en `api/`-mapp som exporterar Express-appen. Vercel kommer automatiskt att upptäcka denna och köra den som en serverlös funktion.
+### 2. Nedladdningsfunktion (Spara till galleri)
+- **[NEW] [download.ts](file:///C:/Users/johnr/StudioProjects/FuckU/src/lib/download.ts)**: En hjälpfunktion som hämtar en bild via URL och triggar en nerladdning.
+- **[MODIFY] [ResultScreen.tsx](file:///C:/Users/johnr/StudioProjects/FuckU/src/components/ResultScreen.tsx)**: Lägg till en "Ladda ner"-knapp (ikon) bredvid "Spara".
 
-#### [MODIFY] [server.ts](file:///C:/Users/johnr/StudioProjects/FuckU/server.ts)
-Vi justerar den befintliga servern så att den kan användas både lokalt och exporteras för Vercel.
+### 3. Hybrid-Storage System
+- **[MODIFY] [storage.ts](file:///C:/Users/johnr/StudioProjects/FuckU/src/lib/storage.ts)**: Skapa en brygga:
+    - `saveScream`: Sparar lokalt i IndexedDB om utloggad, i Firestore om inloggad.
+    - `getAllScreams`: Slår ihop lokala skrik med molnskrik.
+- **[MODIFY] [App.tsx](file:///C:/Users/johnr/StudioProjects/FuckU/src/App.tsx)**: Hantera Auth-state globalt och skicka ner användarinformation till skärmarna.
 
-#### [NEW] [vercel.json](file:///C:/Users/johnr/StudioProjects/FuckU/vercel.json)
-Vi lägger till en konfigurationsfil som talar om för Vercel att alla anrop till `/api/*` ska gå till vår backend-funktion, och resten till vår frontend.
+### 4. Auth-gränssnitt
+- **[NEW] [AuthModal.tsx](file:///C:/Users/johnr/StudioProjects/FuckU/src/components/AuthModal.tsx)**: En modal som erbjuder inloggning med Google/Facebook. Visas när man klickar på en ny profil-ikon eller försöker dela ett monster.
+- **[MODIFY] [GalleryScreen.tsx](file:///C:/Users/johnr/StudioProjects/FuckU/src/components/GalleryScreen.tsx)**: Lägg till inloggnings-status och en knapp för att synka lokala monster till molnet.
 
 ## User Review Required
 
 > [!IMPORTANT]
-> **Miljövariabler:** Du måste lägga till din `GEMINI_API_KEY` i Vercels kontrollpanel (Dashboard) under **Settings > Environment Variables** för att AI-analysen ska fungera på den publika länken.
+> **Firebase Setup:** Du måste skapa ett projekt på [Firebase Console](https://console.firebase.google.com/), aktivera "Google" och "Facebook" under Authentication, och aktivera "Cloud Firestore".
+> **Konfigurationsdata:** Jag kommer skapa en fil där du behöver klistra in dina Firebase-nycklar (liknande hur vi gjorde med Gemini).
 
 ## Verification Plan
 
-### Automated Tests
-1. Kontrollera att `npm run build` fortfarande fungerar lokalt.
-2. Verifiera att API-logiken är intakt i den nya filen.
-
 ### Manual Verification
-1. När vi har skickat upp koden till GitHub, kan du gå till Vercel, välja ditt repository `Johnmannen/FuckU` och klicka på **Deploy**.
-2. Efter deployment, testa att spela in ett skrik via den nya länken.
+1. Verifiera att "Ladda ner"-knappen sparar en bild till telefonen.
+2. Testa att spara ett monster som gäst.
+3. Logga in med Google och verifiera att nästa monster sparas i molnet (Firestore).
+4. Kontrollera att utloggning tar en tillbaka till gästläge men att molnmonstren döljs.

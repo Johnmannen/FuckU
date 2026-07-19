@@ -1,40 +1,38 @@
-# App redo för Vercel
+# Slutfört: Inloggning och Bildnedladdning
 
-Jag har nu förberett din applikation för att kunna deployas direkt på Vercel.
+Appen har nu stöd för både molnlagring (via Google/Facebook) och möjligheten att spara monsterbilder direkt till din telefon.
 
-## Ändringar som utförts
+## Nya funktioner
 
-### Backend (Serverless)
-- **[NEW] [api/index.ts](file:///C:/Users/johnr/StudioProjects/FuckU/api/index.ts)**: Skapat en entry-point för Vercels serverlösa funktioner. Denna fil importerar din Express-app och gör den tillgänglig för Vercel.
-- **[MODIFY] [server.ts](file:///C:/Users/johnr/StudioProjects/FuckU/server.ts)**: Justerat server-koden så att den exporterar appen (`export default app`). Den startar nu bara den lokala servern om den inte körs i en Vercel-miljö.
+### 1. Hybrid-lagring (Moln + Lokal)
+- **Gästläge:** Om du inte är inloggad sparas monstren som vanligt bara i din webbläsare.
+- **Inloggat läge:** Genom att logga in med Google eller Facebook sparas dina monster i Firebase Firestore. Det betyder att de aldrig försvinner, även om du byter telefon eller rensar webbläsaren.
+- **Automatisk Synk:** När du loggar in för första gången försöker appen automatiskt flytta dina befintliga lokala monster till ditt molnkonto.
 
-### Konfiguration
-- **[NEW] [vercel.json](file:///C:/Users/johnr/StudioProjects/FuckU/vercel.json)**: Lagt till en konfigurationsfil som mappar alla anrop till `/api/*` till din backend, medan resten av trafiken går till din frontend (React).
+### 2. Spara till Galleri
+- Jag har lagt till en **"Ladda ner"**-knapp (pil-ikon) i både resultatskärmen och galleriet.
+- När du klickar på den sparas monsterbilden direkt i din telefons bildbibliotek eller mapp för hämtade filer.
+
+### 3. Inloggnings-gränssnitt
+- Det finns nu en profil-ikon längst upp till vänster på startskärmen.
+- Klicka på den för att logga in eller se din status.
+
+## Viktigt: Konfiguration krävs
+För att inloggningen ska fungera på din live-länk behöver du göra följande i **Firebase Console**:
+
+1.  **Skapa projekt:** Gå till [Firebase Console](https://console.firebase.google.com/) och skapa ett projekt som heter "ScreamApp" (eller valfritt namn).
+2.  **Aktivera Auth:** Under "Authentication" -> "Sign-in method", aktivera **Google** och **Facebook**.
+3.  **Skapa Databas:** Under "Firestore Database", klicka på "Create database" och välj "Start in test mode" (för enkelhetens skull just nu).
+4.  **Hämta nycklar:** Klicka på kugghjulet (Project Settings) -> "General" -> "Your apps" och lägg till en "Web App". Kopiera nycklarna du får.
+
+### Lägg in nycklarna i Vercel
+Gå till ditt projekt i Vercel -> **Settings** -> **Environment Variables** och lägg till dessa (med värdena från Firebase):
+- `VITE_FIREBASE_API_KEY`
+- `VITE_FIREBASE_AUTH_DOMAIN`
+- `VITE_FIREBASE_PROJECT_ID`
+- `VITE_FIREBASE_STORAGE_BUCKET`
+- `VITE_FIREBASE_MESSAGING_SENDER_ID`
+- `VITE_FIREBASE_APP_ID`
 
 ## Nästa steg
-
-För att få ut appen på nätet behöver du göra följande:
-
-1.  **Spara och skicka till GitHub:**
-    Kör följande kommandon i din terminal (eller använd Git-verktygen i Android Studio):
-    ```bash
-    git add .
-    git commit -m "Prepare for Vercel deployment"
-    git push origin main
-    ```
-
-2.  **Importera i Vercel:**
-    - Gå till [vercel.com](https://vercel.com).
-    - Klicka på **"Add New"** > **"Project"**.
-    - Välj ditt repository `FuckU`.
-    - Vercel kommer automatiskt att upptäcka att det är ett Vite-projekt.
-
-3.  **Lägg till API-nyckel:**
-    - Innan du klickar på "Deploy", expandera **"Environment Variables"**.
-    - Lägg till `GEMINI_API_KEY` med din nyckel från AI Studio.
-
-4.  **Deploy!**
-    - Klicka på **Deploy**. När det är klart får du en länk som du kan öppna i din telefon.
-
-> [!TIP]
-> Om du vill testa i telefonen *utan* att pusha till GitHub, kan du fortfarande använda din lokala IP (`http://192.168.8.62:3000`) om båda enheterna är på samma Wi-Fi.
+Jag har skickat upp all kod till GitHub. När du har lagt in variablerna i Vercel (och din `.env.local` om du vill testa på datorn) kommer inloggningen att aktiveras automatiskt!

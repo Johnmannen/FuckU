@@ -12,6 +12,14 @@ export interface ScreamRecord {
   imageUrl: string; // pollinations.ai image URL
   audioData?: string; // base64 encoded audio string for persistent playback
   analysis?: string; // localized emotion analysis
+  userId?: string; // Firebase UID if logged in
+}
+
+export interface UserProfile {
+  uid: string;
+  displayName: string | null;
+  photoURL: string | null;
+  email: string | null;
 }
 
 export type ScreenType = 'start' | 'result' | 'gallery';

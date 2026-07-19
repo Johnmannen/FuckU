@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { motion } from 'motion/react';
-import { Play, Square, Save, RefreshCw, Sparkles, Volume2, Calendar, Clock, ChevronRight, Share2 } from 'lucide-react';
-import { ScreamRecord } from '../types';
+import { Play, Square, Save, RefreshCw, Sparkles, Volume2, Calendar, Clock, ChevronRight, Share2, Download, LogIn, User } from 'lucide-react';
+import { ScreamRecord, UserProfile } from '../types';
 import { saveScream } from '../lib/storage';
+import { downloadImage } from '../lib/download';
 import ShareModal from './ShareModal';
 
 interface ResultScreenProps {
@@ -17,8 +18,10 @@ interface ResultScreenProps {
     prompt: string;
     audioBlob: Blob;
   };
+  user: UserProfile | null;
   onSaveComplete: () => void;
   onScreamAgain: () => void;
+  onLoginClick: () => void;
 }
 
 // Function to convert Blob to Base64 Data URL
@@ -44,7 +47,7 @@ const SUMMONING_MESSAGES = [
   'Finalizing cosmic state...'
 ];
 
-export default function ResultScreen({ screamData, onSaveComplete, onScreamAgain }: ResultScreenProps) {
+export default function ResultScreen({ screamData, user, onSaveComplete, onScreamAgain, onLoginClick }: ResultScreenProps) {
   const [analyzedData, setAnalyzedData] = useState<{
     title: string;
     characterType: string;
@@ -313,10 +316,11 @@ export default function ResultScreen({ screamData, onSaveComplete, onScreamAgain
         prompt: activeData.prompt,
         imageUrl: imageUrl, // Save direct Pollinations API URL
         audioData: base64Audio,
-        analysis: activeData.analysis
+        analysis: activeData.analysis,
+        userId: user?.uid
       };
 
-      await saveScream(record);
+      await saveScream(record, user?.uid);
       onSaveComplete();
     } catch (err) {
       console.error('Failed to save scream:', err);
@@ -326,7 +330,21 @@ export default function ResultScreen({ screamData, onSaveComplete, onScreamAgain
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] flex flex-col justify-between items-center px-6 py-8 relative overflow-hidden" id="result-screen-container">
-      
+
+      {/* Profile/Auth Button */}
+      <div className="absolute top-6 right-6 z-30">
+        <button
+          onClick={onLoginClick}
+          className="w-10 h-10 rounded-full bg-[#111] border border-white/10 flex items-center justify-center hover:bg-[#1A1A1A] transition-all overflow-hidden shadow-lg"
+        >
+          {user ? (
+            user.photoURL ? <img src={user.photoURL} alt="" className="w-full h-full object-cover" /> : <User className="w-5 h-5 text-red-500" />
+          ) : (
+            <LogIn className="w-4 h-4 text-neutral-400" />
+          )}
+        </button>
+      </div>
+
       {/* Atmospheric Elements */}
       <div className="absolute -bottom-20 -left-20 w-96 h-96 bg-red-900/10 rounded-full blur-[100px] pointer-events-none z-0"></div>
       <div className="absolute -top-20 -right-20 w-96 h-96 bg-red-900/10 rounded-full blur-[100px] pointer-events-none z-0"></div>
@@ -531,15 +549,27 @@ export default function ResultScreen({ screamData, onSaveComplete, onScreamAgain
             <span>{isSaving ? 'Fusing...' : 'Spara'}</span>
           </button>
 
+          {/* Download Button */}
+          <button
+            onClick={() => downloadImage(imageUrl, activeData.title)}
+            disabled={!imageLoaded}
+            className="w-14 py-4 rounded-2xl bg-[#1A1A1A] border border-white/10 flex items-center justify-center text-neutral-400 hover:text-white hover:border-red-500 transition-all cursor-pointer disabled:opacity-50"
+            title="Ladda ner bild"
+          >
+            <Download className="w-4 h-4" />
+          </button>
+        </div>
+
+        <div className="flex gap-3 w-full">
           {/* Share Button */}
           <button
             onClick={() => setIsShareOpen(true)}
             disabled={!imageLoaded || isSaving}
-            className="flex-1 py-4 rounded-2xl font-display font-black uppercase tracking-widest text-xs flex items-center justify-center gap-2 transition-all cursor-pointer bg-[#1A1A1A] border border-white/10 hover:border-red-500 hover:bg-[#252525] text-white active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 py-3.5 rounded-2xl font-display font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-2 transition-all cursor-pointer bg-[#1A1A1A] border border-white/10 hover:border-red-500 hover:bg-[#252525] text-white active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed"
             id="btn-share-monster"
           >
-            <Share2 className="w-4 h-4 text-red-500" />
-            <span>Dela</span>
+            <Share2 className="w-3.5 h-3.5 text-red-500" />
+            <span>Dela Monster</span>
           </button>
         </div>
 
