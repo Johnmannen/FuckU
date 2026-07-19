@@ -28,6 +28,7 @@ export default function StartScreen({ user, onScreamRecorded, onNavigateToGaller
   // Tracking scream stats
   const maxVolumeRef = useRef(0);
   const volumeListRef = useRef<number[]>([]);
+  const pitchListRef = useRef<number[]>([]);
   const startTimeRef = useRef<number>(0);
   const durationTimerRef = useRef<any>(null);
 
@@ -139,6 +140,21 @@ export default function StartScreen({ user, onScreamRecorded, onNavigateToGaller
         // Intensity is driven primarily by the peak maxVolume, but blended with the average
         const finalIntensity = Math.min(100, Math.round(finalMaxVolume * 0.8 + finalAvgVolume * 0.2));
 
+        // Pitch analysis (basic average over time)
+        const avgPitch = pitchListRef.current.length > 0
+          ? Math.min(100, Math.round(pitchListRef.current.reduce((a, b) => a + b, 0) / pitchListRef.current.length))
+          : 50;
+
+        // Stability analysis (standard deviation of volume)
+        let stability = 100;
+        if (volumeListRef.current.length > 1) {
+          const mean = sum / volumeListRef.current.length;
+          const squareDiffs = volumeListRef.current.map(v => Math.pow(v - mean, 2));
+          const avgSquareDiff = squareDiffs.reduce((a, b) => a + b, 0) / squareDiffs.length;
+          const stdDev = Math.sqrt(avgSquareDiff);
+          stability = Math.max(0, 100 - Math.round(stdDev * 5)); // Higher stdDev = lower stability
+        }
+
         // Determine title
         let title = 'The Tiny Tremor';
         if (finalIntensity >= 30 && finalIntensity <= 60) {
@@ -147,7 +163,7 @@ export default function StartScreen({ user, onScreamRecorded, onNavigateToGaller
           title = 'The Primal Scream';
         }
 
-        // Determine character details with high variety
+        // Determine character details with high variety based on new metrics
         const archetypes = [
           'An ethereal cosmic entity', 'A primal elemental force', 'A monumental divine titan',
           'A gritty dark fantasy warrior', 'A bio-organic abyssal creature', 'A clockwork celestial automaton',
@@ -166,7 +182,13 @@ export default function StartScreen({ user, onScreamRecorded, onNavigateToGaller
           'gritty charcoal and ink sketch'
         ];
 
-        const randomArchetype = archetypes[Math.floor(Math.random() * archetypes.length)];
+        // Weighted selection based on pitch/stability
+        let filteredArchetypes = archetypes;
+        if (avgPitch > 70) filteredArchetypes = archetypes.filter(a => a.includes('ethereal') || a.includes('spectral') || a.includes('radiant'));
+        if (avgPitch < 30) filteredArchetypes = archetypes.filter(a => a.includes('titan') || a.includes('behemoth') || a.includes('giant') || a.includes('ancient'));
+        if (stability < 40) filteredArchetypes = archetypes.filter(a => a.includes('bio-organic') || a.includes('void') || a.includes('mist') || a.includes('shadowy'));
+
+        const randomArchetype = filteredArchetypes[Math.floor(Math.random() * filteredArchetypes.length)] || archetypes[0];
         const randomStyle = styles[Math.floor(Math.random() * styles.length)];
 
         let characterType = `A screaming ${randomArchetype.toLowerCase()}`;
@@ -194,7 +216,9 @@ export default function StartScreen({ user, onScreamRecorded, onNavigateToGaller
           characterType,
           characterStyle: randomStyle,
           prompt: completePrompt,
-          audioBlob
+          audioBlob,
+          pitch: avgPitch,
+          stability: stability
         });
       };
 
@@ -212,31 +236,43 @@ export default function StartScreen({ user, onScreamRecorded, onNavigateToGaller
       // Start Realtime Web Audio Analysis loop
       const bufferLength = analyser.frequencyBinCount;
       const dataArray = new Uint8Array(bufferLength);
+      const freqData = new Uint8Array(bufferLength);
 
       const updateVolume = () => {
         if (!analyserRef.current) return;
         
         analyserRef.current.getByteTimeDomainData(dataArray);
+        analyserRef.current.getByteFrequencyData(freqData);
 
-        // Calculate root mean square (RMS) amplitude
+        // 1. Calculate Volume (RMS)
         let sumSquares = 0;
         for (let i = 0; i < bufferLength; i++) {
-          const normalized = (dataArray[i] - 128) / 128; // scale to -1..1
+          const normalized = (dataArray[i] - 128) / 128;
           sumSquares += normalized * normalized;
         }
         const rms = Math.sqrt(sumSquares / bufferLength);
-
-        // Map RMS value to percentage (0 - 100).
-        // Standard speaking range peaks around 0.1-0.2 RMS, so scale up with a multiplier of 3.5
         const volumePercentage = Math.min(100, Math.round(rms * 100 * 3.5));
         
         setRealtimeVolume(volumePercentage);
+
+        // 2. Calculate Pitch (Dominant Frequency Centroid)
+        let totalWeight = 0;
+        let weightedSum = 0;
+        for (let i = 0; i < bufferLength; i++) {
+          const weight = freqData[i];
+          weightedSum += i * weight;
+          totalWeight += weight;
+        }
+        const avgBin = totalWeight > 0 ? weightedSum / totalWeight : 0;
+        // Map bin (0..128) to 0..100 scale
+        const pitchPercentage = Math.min(100, Math.round((avgBin / bufferLength) * 100 * 2)); // Mul by 2 to sensitive the range
 
         // Track stats
         if (volumePercentage > maxVolumeRef.current) {
           maxVolumeRef.current = volumePercentage;
         }
         volumeListRef.current.push(volumePercentage);
+        pitchListRef.current.push(pitchPercentage);
 
         // Track duration precisely
         const elapsed = (Date.now() - startTimeRef.current) / 1000;

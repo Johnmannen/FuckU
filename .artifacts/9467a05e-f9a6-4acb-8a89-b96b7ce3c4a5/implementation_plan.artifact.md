@@ -1,49 +1,48 @@
-# Plan: Publicera på Google Play Store
+# Plan: Ultimate Scream Experience - 1000+ Figurer & Videoexport
 
-För att förvandla din webbapp till en riktig Android-app som kan laddas ner från Google Play Store använder vi ett verktyg som heter **Capacitor**. Det "paketerar" din React-hemsida till en app-behållare som kan köras på mobiler.
-
-## Förutsättningar
-- Ett **Google Play Developer Account** (kostar ca $25 som en engångsavgift till Google).
-- **Android Studio** installerat på din dator.
+Vi ska bygga ett system som mäter skrikets minsta detalj, skapar 1000+ unika arketyp-möjligheter och tillåter användaren att spara hela upplevelsen som en video.
 
 ## Proposed Changes
 
-### 1. Installera Capacitor
-Vi lägger till Capacitor i ditt projekt för att hantera kopplingen till Android.
-- Installera `@capacitor/core`, `@capacitor/cli` och `@capacitor/android`.
-- Initiera Capacitor med ett unikt paketnamn (t.ex. `com.johnmannen.screamapp`).
+### 1. Avancerad Ljud-analys (The "Scream Fingerprint")
+Vi går bortom bara volym.
+- **[MODIFY] [StartScreen.tsx](file:///C:/Users/johnr/StudioProjects/FuckU/src/components/StartScreen.tsx)**:
+    - **Pitch Detection:** Vi analyserar om skriket är ljust (hög frekvens) eller mörkt (låg frekvens).
+    - **Stability Analysis:** Mäter om rösten är "ren" eller darrig/hes (jitter/shimmer).
+    - **Attack Force:** Hur snabbt skriket når sin peak (aggressivitet).
 
-### 2. Anpassa Koden för Mobil
-Vissa saker i en webbläsare fungerar annorlunda i en installerad app.
-- **Backend-anrop:** Vi måste se till att appen pratar med din Vercel-länk istället för `localhost`.
-- **Mobil-anpassningar:** Justera eventuella knappar eller menyer som känns "webbiga" så att de känns som en riktig app.
+### 2. Massivt Figurbibliotek (1000+ Figurer)
+Vi skapar en enorm databas som kategoriseras för att matcha ljudanalysen perfekt.
+- **[MODIFY] [fallbacks.ts](file:///C:/Users/johnr/StudioProjects/FuckU/fallbacks.ts)**:
+    - Utöka till **1000+ unika kombinationer**.
+    - **Kategorier:**
+        - *Cute & Whimsical* (Ljus pitch, låg volym)
+        - *Pathetic & Weak* (Darrig röst, låg volym)
+        - *Cyberpunk & Action* (Hög stabilitet, medel volym)
+        - *Eldritch Horror* (Kaotisk/darrig röst, hög volym)
+        - *Mythological Deities* (Dov pitch, extrem volym, lång duration)
+        - *Animerat/Anime* (Speciella stiltaggar)
+        - *Hyper-realistic* (Verklighetstrogna monster)
 
-### 3. Byggprocessen
-Vi skapar de filer som Google Play kräver.
-1.  Kör `npm run build` för att skapa den senaste versionen av din webbkod.
-2.  Kör `npx cap sync` för att kopiera in koden i Android-projektet.
-3.  Öppna projektet i Android Studio.
+### 3. Smart Hybrid-logik
+- **[MODIFY] [server.ts](file:///C:/Users/johnr/StudioProjects/FuckU/server.ts)**:
+    - Prioriterar alltid **AI-generering** (Gemini 3.5 Flash) för en 100% unik bild.
+    - Om API-kvoten är slut eller anropet misslyckas, hoppar systemet direkt till en av de 1000+ fördefinierade figurerna som bäst matchar det specifika ljud-fingeravtrycket.
 
-### 4. Skapa en "Signed App Bundle" (AAB)
-Detta görs i Android Studio:
-- Skapa en digital signatur (Keystore).
-- Bygg en `.aab`-fil som är det format Google Play vill ha.
-
-### 5. Publicering i Google Play Console
-- Skapa en ny app i Play Console.
-- Ladda upp din `.aab`-fil.
-- Fyll i beskrivning, lägg till skärmbilder och välj åldersgräns.
-- Skicka in för granskning (tar oftast några dagar första gången).
+### 4. Videoexport till Galleri (MP4)
+- **[NEW] [videoExport.ts](file:///C:/Users/johnr/StudioProjects/FuckU/src/lib/videoExport.ts)**:
+    - Vi bygger en funktion som filmar skärmen i realtid medan ljudet spelas upp.
+    - Resultatet sparas som en videofil i telefonens galleri, komplett med mun-animationen och ljudet.
 
 ## User Review Required
 
 > [!IMPORTANT]
-> **Backend-servern:** Din Express-backend (`server.ts`) kommer fortfarande att köras på Vercel. Android-appen kommer att fungera som en "klient" som ringer till Vercel för att få sina monster.
-> **Google Play-avgift:** Kom ihåg att Google tar ut en engångsavgift på $25 för att få öppna ett utvecklarkonto.
+> **Video-generering:** På mobiler kan det ta 5-10 sekunder att "rendera" videon efter att man klickat på knappen. Vi lägger till en tydlig laddningsmätare.
+> **Databasstorlek:** Med 1000+ figurer kommer appen att växa något i storlek, men det kommer att kännas som en outtömlig källa av kreativitet.
 
 ## Verification Plan
 
 ### Manual Verification
-- Kör appen i en Android-emulator eller på en fysisk telefon via Android Studio.
-- Kontrollera att mikrofonen och inloggningen fungerar inuti app-behållaren.
-- Verifiera att nerladdningsfunktionen fungerar korrekt på Android.
+- Verifiera att ett ljust skrik konsekvent ger "gulliga" eller "eteriska" resultat.
+- Verifiera att ett mörkt vrål ger "gudar" eller "monumentala" figurer.
+- Ladda ner en video och dela den till en annan app för att se att både bild, rörelse och ljud följer med.

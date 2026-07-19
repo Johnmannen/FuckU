@@ -13,6 +13,8 @@ export interface ScreamRecord {
   audioData?: string; // base64 encoded audio string for persistent playback
   analysis?: string; // localized emotion analysis
   userId?: string; // Firebase UID if logged in
+  pitch?: number; // 0-100
+  stability?: number; // 0-100
 }
 
 export interface UserProfile {

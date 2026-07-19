@@ -4,8 +4,10 @@ import { Play, Square, Save, RefreshCw, Sparkles, Volume2, Calendar, Clock, Chev
 import { ScreamRecord, UserProfile } from '../types';
 import { saveScream } from '../lib/storage';
 import { downloadImage } from '../lib/download';
+import { recordScreamVideo } from '../lib/videoExport';
 import { API_ENDPOINTS } from '../lib/api';
 import ShareModal from './ShareModal';
+import { Video, FileVideo } from 'lucide-react';
 
 interface ResultScreenProps {
   screamData: {
@@ -60,6 +62,8 @@ export default function ResultScreen({ screamData, user, onSaveComplete, onScrea
   const [imageLoaded, setImageLoaded] = useState(false);
   const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
+  const [isVideoGenerating, setIsVideoGenerating] = useState(false);
+  const [videoProgress, setVideoProgress] = useState(0);
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const audioUrlRef = useRef<string | null>(null);
@@ -150,6 +154,8 @@ export default function ResultScreen({ screamData, user, onSaveComplete, onScrea
         maxVolume: screamData.maxVolume,
         avgVolume: screamData.avgVolume,
         intensity: screamData.intensity,
+        pitch: (screamData as any).pitch,
+        stability: (screamData as any).stability,
         lang: userLang
       })
     })
@@ -326,6 +332,28 @@ export default function ResultScreen({ screamData, user, onSaveComplete, onScrea
     } catch (err) {
       console.error('Failed to save scream:', err);
       setIsSaving(false);
+    }
+  };
+
+  const handleDownloadVideo = async () => {
+    if (isVideoGenerating) return;
+    setIsVideoGenerating(true);
+    setVideoProgress(0);
+
+    try {
+      const videoBlob = await recordScreamVideo(imageUrl, screamData.audioBlob, activeData.title, (p) => setVideoProgress(p));
+      const url = URL.createObjectURL(videoBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${activeData.title.replace(/\s+/g, '_').toLowerCase()}.mp4`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Video generation failed:', err);
+    } finally {
+      setIsVideoGenerating(false);
     }
   };
 
@@ -510,10 +538,32 @@ export default function ResultScreen({ screamData, user, onSaveComplete, onScrea
 
         {/* Metric 2: Max Volume / Intensity */}
         <div className="bg-[#181818] border border-white/5 rounded-2xl p-4 flex flex-col justify-center" id="stat-col-intensity">
-          <span className="text-[10px] uppercase font-mono tracking-[0.15em] text-red-500 font-bold">Intensity Scale</span>
+          <span className="text-[10px] uppercase font-mono tracking-[0.15em] text-red-500 font-bold">Intensity</span>
           <div className="flex items-baseline gap-1 mt-1">
             <span className="font-mono text-3xl font-black text-red-500 tracking-tighter">{screamData.intensity}</span>
             <span className="font-sans text-xs text-red-400 font-semibold">%</span>
+          </div>
+        </div>
+
+        {/* Metric 3: Pitch (Small) */}
+        <div className="bg-[#181818] border border-white/5 rounded-2xl p-3 flex flex-col justify-center" id="stat-col-pitch">
+          <span className="text-[8px] uppercase font-mono tracking-[0.15em] text-neutral-500 font-bold">Pitch Profile</span>
+          <div className="flex items-center gap-2 mt-1">
+            <div className="flex-1 h-1.5 bg-neutral-800 rounded-full overflow-hidden">
+              <div className="h-full bg-blue-500 transition-all" style={{ width: `${(screamData as any).pitch || 50}%` }} />
+            </div>
+            <span className="font-mono text-xs text-white">{(screamData as any).pitch || 50}%</span>
+          </div>
+        </div>
+
+        {/* Metric 4: Stability (Small) */}
+        <div className="bg-[#181818] border border-white/5 rounded-2xl p-3 flex flex-col justify-center" id="stat-col-stability">
+          <span className="text-[8px] uppercase font-mono tracking-[0.15em] text-neutral-500 font-bold">Voice Stability</span>
+          <div className="flex items-center gap-2 mt-1">
+            <div className="flex-1 h-1.5 bg-neutral-800 rounded-full overflow-hidden">
+              <div className="h-full bg-green-500 transition-all" style={{ width: `${(screamData as any).stability || 80}%` }} />
+            </div>
+            <span className="font-mono text-xs text-white">{(screamData as any).stability || 80}%</span>
           </div>
         </div>
 
@@ -558,6 +608,18 @@ export default function ResultScreen({ screamData, user, onSaveComplete, onScrea
             title="Ladda ner bild"
           >
             <Download className="w-4 h-4" />
+          </button>
+
+          {/* Video Export Button */}
+          <button
+            onClick={handleDownloadVideo}
+            disabled={!imageLoaded || isVideoGenerating}
+            className={`w-14 py-4 rounded-2xl border transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center ${
+              isVideoGenerating ? 'bg-yellow-500/20 border-yellow-500 text-yellow-500' : 'bg-[#1A1A1A] border-white/10 text-neutral-400 hover:text-red-500'
+            }`}
+            title="Exportera som video"
+          >
+            {isVideoGenerating ? <div className="text-[8px] font-bold">{Math.round(videoProgress)}%</div> : <FileVideo className="w-4 h-4" />}
           </button>
         </div>
 

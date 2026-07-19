@@ -1,6 +1,7 @@
-- `[x]` Installera Capacitor och Android-plattform
-- `[x]` Konfigurera `capacitor.config.ts`
-- `[x]` Lägg till Android-rättigheter (Mikrofon, Internet) i `AndroidManifest.xml`
-- `[x]` Anpassa API-anrop för mobil (Absolute URLs)
-- `[ ]` Skapa ikoner och Splash screen (Valfritt men rekommenderat)
-- `[ ]` Bygg och verifiera i Android Studio
+- `[/]` Ultimate Scream Experience - 1000+ Figurer & Videoexport
+  - `[ ]` Implementera fördjupad ljudanalys (Pitch, Stabilitet) i `StartScreen.tsx`
+  - `[ ]` Skapa det enorma biblioteket (1000+ figurer) i `fallbacks.ts`
+  - `[ ]` Uppdatera serverlogik för hybrid-system och nya variabler
+  - `[ ]` Bygg videoexport-funktionen (`videoExport.ts`)
+  - `[ ]` Lägg till "Spara som Video" i `ResultScreen.tsx`
+  - `[ ]` Synka, bygg och deploya till GitHub/Vercel
