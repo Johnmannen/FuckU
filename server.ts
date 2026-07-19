@@ -96,7 +96,7 @@ Map the scream's physical metrics to the character:
 Provide a highly detailed prompt for an image generator. Be very specific and unique! Add '--no pokemon, cartoon, anime, chibi, childish, flat colors' at the end of every prompt.`;
 
     const response = await ai.models.generateContent({
-      model: "gemini-1.5-flash",
+      model: "gemini-3.5-flash",
       contents: `Analyze this scream and summon its unique creature:
 - Duration: ${duration} seconds
 - Max Volume: ${maxVolume}%
