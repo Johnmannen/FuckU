@@ -30,18 +30,25 @@ export default function StartScreen({ onScreamRecorded, onNavigateToGallery }: S
   const durationTimerRef = useRef<any>(null);
 
   // Initialize Audio Context and request permissions
-  const initAudio = async (): Promise<boolean> => {
+  const initAudio = async (isProactive: boolean = false): Promise<boolean> => {
     try {
-      setPermissionError(null);
+      if (!isProactive) {
+        setPermissionError(null);
+      }
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error('Microphone recording is not supported in this browser/environment or inside this iframe.');
+      }
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
       return true;
     } catch (err: any) {
       console.error('Microphone access denied:', err);
-      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-        setPermissionError('Microphone permission was denied. Please allow microphone access to record your screams!');
-      } else {
-        setPermissionError('Could not access microphone: ' + (err.message || 'Unknown error'));
+      if (!isProactive) {
+        if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+          setPermissionError('Microphone permission was denied. Please allow microphone access to record your screams!');
+        } else {
+          setPermissionError('Could not access microphone: ' + (err.message || 'Unknown error'));
+        }
       }
       return false;
     }
@@ -49,7 +56,7 @@ export default function StartScreen({ onScreamRecorded, onNavigateToGallery }: S
 
   // Proactively request permission on mount to make recording instant on click
   useEffect(() => {
-    initAudio().then(success => {
+    initAudio(true).then(success => {
       if (success && streamRef.current) {
         streamRef.current.getTracks().forEach(track => track.stop());
         streamRef.current = null;
