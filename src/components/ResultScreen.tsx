@@ -1,13 +1,12 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { motion } from 'motion/react';
-import { Play, Square, Save, RefreshCw, Sparkles, Volume2, Calendar, Clock, ChevronRight, Share2, Download, LogIn, User } from 'lucide-react';
+import { Play, Square, Save, RefreshCw, Sparkles, Volume2, Calendar, Clock, ChevronRight, Share2, Download, LogIn, User, FileVideo } from 'lucide-react';
 import { ScreamRecord, UserProfile } from '../types';
 import { saveScream } from '../lib/storage';
 import { downloadMonsterCard } from '../lib/download';
 import { recordScreamVideo } from '../lib/videoExport';
 import { API_ENDPOINTS } from '../lib/api';
 import ShareModal from './ShareModal';
-import { Video, FileVideo } from 'lucide-react';
 
 interface ResultScreenProps {
   screamData: {
@@ -212,11 +211,9 @@ export default function ResultScreen({ screamData, user, onSaveComplete, onScrea
   };
 
   // Pollinations API image URL with random seed for guaranteed uniqueness
-  // We use useMemo to freeze the seed and URL so it doesn't change on every re-render
   const imageUrl = useMemo(() => {
     const seed = Math.floor(Math.random() * 1000000);
     const encodedPrompt = encodeURIComponent(activeData.prompt);
-    // Add a timestamp to ensure uniqueness across sessions if the prompt is identical
     return `https://image.pollinations.ai/prompt/${encodedPrompt}?width=512&height=512&nologo=true&seed=${seed}&t=${Date.now()}`;
   }, [activeData.prompt]);
 
@@ -330,7 +327,9 @@ export default function ResultScreen({ screamData, user, onSaveComplete, onScrea
         imageUrl: imageUrl, // Save direct Pollinations API URL
         audioData: base64Audio,
         analysis: activeData.analysis,
-        userId: user?.uid
+        userId: user?.uid,
+        pitch: (screamData as any).pitch,
+        stability: (screamData as any).stability
       };
 
       await saveScream(record, user?.uid);
@@ -365,6 +364,16 @@ export default function ResultScreen({ screamData, user, onSaveComplete, onScrea
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] flex flex-col justify-between items-center px-6 py-8 relative overflow-hidden" id="result-screen-container">
+
+      {/* SVG Filter for Organic Warp Animation */}
+      <svg className="hidden">
+        <defs>
+          <filter id="screamWarp">
+            <feTurbulence type="fractalNoise" baseFrequency="0.01 0.05" numOctaves="2" result="noise" seed="1" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale={isPlayingAudio ? (playbackVolume * 0.4) : 0} xChannelSelector="R" yChannelSelector="G" />
+          </filter>
+        </defs>
+      </svg>
 
       {/* Profile/Auth Button */}
       <div className="absolute top-6 right-6 z-30">
@@ -428,54 +437,33 @@ export default function ResultScreen({ screamData, user, onSaveComplete, onScrea
               borderColor: isPlayingAudio ? `rgba(239, 68, 68, ${0.2 + (playbackVolume * 0.008)})` : 'rgba(255, 255, 255, 0.1)',
               boxShadow: isPlayingAudio 
                 ? `0 0 ${40 + playbackVolume * 1.5}px rgba(220, 38, 38, ${0.15 + (playbackVolume * 0.006)})` 
-                : '0 0 80px rgba(220, 38, 38, 0.15)'
+                : '0 0 80px rgba(220, 38, 38, 0.15)',
+              filter: isPlayingAudio ? 'url(#screamWarp)' : 'none'
             }}
             id="avatar-image-frame"
           >
-            
-            {/* Main Generated Image with Split-Jaw Animation */}
-            {!isAnalyzing && (
-              <div className="relative w-full h-full overflow-hidden">
-                {/* Top Half (Stationary) */}
-                <div
-                  className="absolute inset-0 z-10"
-                  style={{
-                    clipPath: 'inset(0% 0% 50% 0%)',
-                    transform: isPlayingAudio
-                      ? `translate(${(Math.random() - 0.5) * (playbackVolume * 0.1)}px, ${(Math.random() - 0.5) * (playbackVolume * 0.1)}px)`
-                      : 'none'
-                  }}
-                >
-                  <img
-                    src={imageUrl}
-                    alt={activeData.title}
-                    referrerPolicy="no-referrer"
-                    onLoad={() => setImageLoaded(true)}
-                    className={`w-full h-full object-cover transition-opacity duration-700 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
-                    filter={isPlayingAudio ? `brightness(${1 + (playbackVolume * 0.005)}) contrast(${1 + (playbackVolume * 0.002)})` : 'none'}
-                  />
-                </div>
 
-                {/* Bottom Half (Jaw Drop) */}
-                <div
-                  className="absolute inset-0 z-10"
-                  style={{
-                    clipPath: 'inset(50% 0% 0% 0%)',
-                    transform: isPlayingAudio
-                      ? `translate(${(Math.random() - 0.5) * (playbackVolume * 0.1)}px, ${playbackVolume * 0.25}px)`
-                      : 'none',
-                    transition: isPlayingAudio ? 'none' : 'transform 0.1s ease-out'
-                  }}
-                >
-                  <img
-                    src={imageUrl}
-                    alt={activeData.title}
-                    referrerPolicy="no-referrer"
-                    className={`w-full h-full object-cover transition-opacity duration-700 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
-                    filter={isPlayingAudio ? `brightness(${1 + (playbackVolume * 0.005)}) contrast(${1 + (playbackVolume * 0.002)})` : 'none'}
-                  />
-                </div>
-              </div>
+            {/* Main Generated Image with Organic Warp Animation */}
+            {!isAnalyzing && (
+              <img
+                src={imageUrl}
+                alt={activeData.title}
+                referrerPolicy="no-referrer"
+                onLoad={() => setImageLoaded(true)}
+                onError={() => setImageLoaded(true)}
+                className={`w-full h-full object-cover transition-opacity duration-700 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+                style={{
+                  filter: isPlayingAudio
+                    ? `brightness(${1 + (playbackVolume * 0.008)})
+                       contrast(${1 + (playbackVolume * 0.004)})
+                       hue-rotate(${playbackVolume * 0.1}deg)`
+                    : 'none',
+                  transform: isPlayingAudio
+                    ? `translate(${(Math.random() - 0.5) * (playbackVolume * 0.1)}px, ${playbackVolume * 0.1}px)`
+                    : 'none',
+                  transition: isPlayingAudio ? 'none' : 'transform 0.2s ease-out, filter 0.2s ease-out'
+                }}
+              />
             )}
 
             {/* Loading Summoner Spinner */}
@@ -505,8 +493,6 @@ export default function ResultScreen({ screamData, user, onSaveComplete, onScrea
                 </p>
               </div>
             )}
-
-            {/* Emotion Analysis is now moved outside for cleaner view */}
           </div>
         </div>
 

@@ -164,7 +164,11 @@ export default function StartScreen({ user, onScreamRecorded, onNavigateToGaller
         }
 
         // Determine character details with high variety based on new metrics
-        const archetypes = [
+        const archetypes = finalIntensity < 30 ? [
+          'baby cloud sprite', 'tiny stardust kitten', 'fluffy mushroom spirit', 'miniature teacup gryphon',
+          'soft woolly mammoth calf', 'sparkling pollen pixie', 'sleepy moon bunny', 'glowing jellybean blob',
+          'miniature clockwork hummingbird', 'tiny crystal dragonling'
+        ] : [
           'An ethereal cosmic entity', 'A primal elemental force', 'A monumental divine titan',
           'A gritty dark fantasy warrior', 'A bio-organic abyssal creature', 'A clockwork celestial automaton',
           'A fractal crystal guardian', 'A volcanic obsidian behemoth', 'A shadowy void weaver',
@@ -174,7 +178,10 @@ export default function StartScreen({ user, onScreamRecorded, onNavigateToGaller
           'A mercurial liquid metal form', 'A bioluminescent deep-sea terror'
         ];
 
-        const styles = [
+        const styles = finalIntensity < 30 ? [
+          'soft Ghibli-inspired watercolor', 'cute 3D claymation aesthetic', 'delicate storybook illustration',
+          'vibrant digital felt texture', 'pastel watercolor and ink', 'whimsical felt-tip sketch'
+        ] : [
           'intricate Baroque oil painting', 'hyper-detailed digital matte painting',
           'cinematic 3D V-Ray render', 'dark gothic fine art', 'surrealist masterpiece with heavy textures',
           'photorealistic epic fantasy art', 'futuristic cyberpunk neon illustration',
@@ -184,28 +191,35 @@ export default function StartScreen({ user, onScreamRecorded, onNavigateToGaller
 
         // Weighted selection based on pitch/stability
         let filteredArchetypes = archetypes;
-        if (avgPitch > 70) filteredArchetypes = archetypes.filter(a => a.includes('ethereal') || a.includes('spectral') || a.includes('radiant'));
-        if (avgPitch < 30) filteredArchetypes = archetypes.filter(a => a.includes('titan') || a.includes('behemoth') || a.includes('giant') || a.includes('ancient'));
-        if (stability < 40) filteredArchetypes = archetypes.filter(a => a.includes('bio-organic') || a.includes('void') || a.includes('mist') || a.includes('shadowy'));
+        if (finalIntensity >= 30) {
+          if (avgPitch > 70) filteredArchetypes = archetypes.filter(a => a.includes('ethereal') || a.includes('spectral') || a.includes('radiant'));
+          if (avgPitch < 30) filteredArchetypes = archetypes.filter(a => a.includes('titan') || a.includes('behemoth') || a.includes('giant') || a.includes('ancient'));
+          if (stability < 40) filteredArchetypes = archetypes.filter(a => a.includes('bio-organic') || a.includes('void') || a.includes('mist') || a.includes('shadowy'));
+        }
 
         const randomArchetype = filteredArchetypes[Math.floor(Math.random() * filteredArchetypes.length)] || archetypes[0];
         const randomStyle = styles[Math.floor(Math.random() * styles.length)];
 
         let characterType = `A screaming ${randomArchetype.toLowerCase()}`;
-        if (finalDuration >= 2 && finalDuration <= 4) {
+        if (finalIntensity < 30) {
+          characterType = `A cute and tiny ${randomArchetype.toLowerCase()}`;
+        } else if (finalDuration >= 2 && finalDuration <= 4) {
           characterType = `A formidable screaming ${randomArchetype.toLowerCase()}`;
         } else if (finalDuration > 4) {
           characterType = `A colossal and ancient screaming ${randomArchetype.toLowerCase()}`;
         }
 
         let intensityAdjective = 'whispering and subtle';
-        if (finalIntensity >= 30 && finalIntensity <= 60) {
+        if (finalIntensity < 30) {
+          intensityAdjective = 'letting out a tiny cute yawn';
+        } else if (finalIntensity >= 30 && finalIntensity <= 60) {
           intensityAdjective = 'resonant and surging';
         } else if (finalIntensity > 60) {
           intensityAdjective = 'explosive and world-shattering';
         }
 
-        const completePrompt = `Masterpiece, 8k, highly detailed, photorealistic, cinematic lighting, intricate textures. ${characterType} with a wide-open mouth letting out a powerful vocal release, ${intensityAdjective}, in the style of ${randomStyle}. Dark atmospheric background, epic composition. --no pokemon, cartoon, anime, chibi, childish, flat colors`;
+        const negativeSuffix = finalIntensity < 30 ? '' : ' --no pokemon, cartoon, anime, chibi, childish, flat colors';
+        const completePrompt = `Masterpiece, 8k, highly detailed, photorealistic, cinematic lighting, intricate textures. ${characterType} with a wide-open mouth letting out a powerful vocal release, ${intensityAdjective}, in the style of ${randomStyle}. Dark atmospheric background, epic composition.${negativeSuffix}`;
 
         onScreamRecorded({
           duration: Number(finalDuration.toFixed(2)),

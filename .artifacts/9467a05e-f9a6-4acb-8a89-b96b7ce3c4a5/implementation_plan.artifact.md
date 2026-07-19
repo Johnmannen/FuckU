@@ -1,43 +1,43 @@
-# Plan: "Monster Cards" & Realistisk Skrik-animation
+# Plan: "Organic Scream" Animation & Clean Social Cards
 
-Vi ska lösa problemet med text som döljer bilden genom att skapa ett "Monster Card"-format vid nerladdning, samt uppgradera animationen så att figuren faktiskt ser ut att öppna munnen.
+Vi ska ersätta den mekaniska "delade" bilden med en organisk, stretchig animation som känns levande, samt rensa upp i gränssnittet så att konsten får ta plats.
 
 ## Proposed Changes
 
-### 1. Förbättrad Skrik-animation ("Split-Jaw")
-Istället för att stretcha hela bilden, delar vi upp den i två delar: en fast överdel och en rörlig underdel (käken).
+### 1. Från "Split-Jaw" till "Organic Warp" (Animation)
+Istället för att klippa bilden i två delar använder vi en avancerad SVG-förskjutningskarta (Displacement Map).
 - **[MODIFY] [ResultScreen.tsx](file:///C:/Users/johnr/StudioProjects/FuckU/src/components/ResultScreen.tsx)**:
-    - Implementera två bild-lager med `clip-path`.
-    - Övre halvan (0-50%) förblir stationär.
-    - Undre halvan (50-100%) rör sig nedåt baserat på `playbackVolume`.
-    - Detta skapar en dramatisk och realistisk "munöppning".
+    - Ta bort `clip-path` och de två separata bild-lagren.
+    - Lägg till ett inbyggt SVG-filter (`#screamWarp`) som använder `feTurbulence` och `feDisplacementMap`.
+    - **Effekt:** När volymen ökar kommer bilden att stretchas och "flyta" organiskt nedåt från mitten, vilket ger en elastisk känsla i ansiktet/munnen.
+    - Koppla `scale`-attributet i filtret direkt till `playbackVolume`.
 
-### 2. UI-Layout: Separera Text från Bild
+### 2. UI-Layout: "Art First"
 - **[MODIFY] [ResultScreen.tsx](file:///C:/Users/johnr/StudioProjects/FuckU/src/components/ResultScreen.tsx)**:
-    - Flytta `emotion-analysis-box` från att ligga *på* bilden till att ligga i en egen sektion direkt *under* bilden.
-    - Detta gör att hela bilden syns tydligt i appen.
+    - Flytta bort analys-texten helt från bildens yta.
+    - Placera texten i en snygg "infobricka" mellan bilden och dashboarden.
+    - Detta säkerställer att ingenting döljer monsterbilden.
 
-### 3. "Monster Card" vid Nerladdning (Social Media Optimized)
-För att det ska se proffsigt ut när man delar på sociala medier bygger vi en funktion som skapar ett högupplöst "samlarkort".
+### 3. Premium "Monster Cards" vid Nerladdning
+Vi uppgraderar samlarkorten så att de blir ännu snyggare för sociala medier.
 - **[MODIFY] [download.ts](file:///C:/Users/johnr/StudioProjects/FuckU/src/lib/download.ts)**:
-    - Skapa en funktion som ritar upp en canvas i ett optimerat format (t.ex. 1080x1350 px).
-    - **Layout:** Monster-bilden överst, följt av en sektion med statistik (Intensitet, Pitch etc.) presenterat med snygga ikoner, och analysen i botten.
-    - **Design:** Vi lägger till en mörk gradient-bakgrund, snygg typografi och en liten diskret logotyp ("Screamed with FuckU") för att öka igenkänningen vid delning.
-    - **Kvalitet:** Använd högsta möjliga upplösning så att texten inte blir pixlig på Instagram/Facebook.
+    - Uppdatera layouten: Hela monsterbilden visas ostörd längst upp.
+    - All text och statistik (Pitch, Intensity, Analysis) placeras på en designad yta under bilden.
+    - Lägg till en mörk, elegant ram runt hela kortet.
 
-### 4. Videoexport Uppdatering
+### 4. Videoexport Synkronisering
 - **[MODIFY] [videoExport.ts](file:///C:/Users/johnr/StudioProjects/FuckU/src/lib/videoExport.ts)**:
-    - Uppdatera canvas-logiken till att använda "Split-Jaw"-tekniken även i videon för att matcha upplevelsen i appen.
+    - Uppdatera video-renderingens canvas så att den använder samma organiska stretch-logik som visas i appen.
 
 ## User Review Required
 
 > [!IMPORTANT]
-> **Animationen:** Eftersom vi inte vet exakt var munnen är på bilden delar vi den på mitten (50%). Det fungerar bäst om figuren är hyfsat centrerad.
-> **Kort-formatet:** Den sparade bilden kommer nu se ut som ett samlarkort snarare än bara den råa kvadratiska bilden.
+> **Animationen:** Den nya tekniken ("Warping") kommer att få bilden att se ut som om den är gjord av gummi eller vätska som reagerar på ljudet. Det ser betydligt mer naturligt ut än den tidigare "klipp-och-klistra"-metoden.
+> **Sociala Medier:** Det nya formatet på samlarkortet är optimerat för att se professionellt ut när det delas på Instagram-stories eller som ett inlägg.
 
 ## Verification Plan
 
 ### Manual Verification
-- Spela upp ett skrik: Kontrollera att bilden delar sig och "öppnar munnen".
-- Ladda ner bild: Verifiera att den sparade filen innehåller både bild, stats och text på ett snyggt sätt.
-- Ladda ner video: Kontrollera att munöppningen ser likadan ut i videon.
+- Spela upp ett skrik: Verifiera att bilden "stretchar" organiskt istället för att delas.
+- Ladda ner monsterkort: Kontrollera att bilden är helt ren från text och att all info ligger snyggt undertill.
+- Verifiera att inga grafiska glitchar uppstår på mobilen vid den nya animationen.

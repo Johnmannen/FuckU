@@ -1,5 +1,5 @@
 /**
- * Utility to record an animated "Split-Jaw" canvas + audio into an MP4/WebM video.
+ * Utility to record an animated "Organic Warp" canvas + audio into an MP4/WebM video.
  */
 export async function recordScreamVideo(
   imageUrl: string,
@@ -38,7 +38,11 @@ export async function recordScreamVideo(
 
       const recorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp9' });
       const chunks: Blob[] = [];
-      recorder.ondataavailable = (e) => chunks.push(event?.data || e.data);
+      recorder.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) {
+          chunks.push(e.data);
+        }
+      };
       recorder.onstop = () => {
         const videoBlob = new Blob(chunks, { type: 'video/mp4' });
         URL.revokeObjectURL(audioUrl);
@@ -47,7 +51,7 @@ export async function recordScreamVideo(
 
       const render = () => {
         if (audio.paused || audio.ended) {
-          recorder.stop();
+          if (recorder.state !== 'inactive') recorder.stop();
           return;
         }
 
@@ -60,35 +64,22 @@ export async function recordScreamVideo(
         ctx.fillStyle = "#0A0A0A";
         ctx.fillRect(0, 0, 720, 720);
 
-        // --- SPLIT-JAW ANIMATION ---
-        const jawOffset = volRatio * 40;
-        const shakeX = (Math.random() - 0.5) * volRatio * 10;
-        const shakeY = (Math.random() - 0.5) * volRatio * 10;
+        // --- ORGANIC WARP SIMULATION ON CANVAS ---
+        const warpScaleY = 1 + (volRatio * 0.15);
+        const shakeX = (Math.random() - 0.5) * volRatio * 15;
+        const shakeY = (Math.random() - 0.5) * volRatio * 15;
 
         ctx.save();
-        ctx.translate(shakeX, shakeY);
+        ctx.translate(360 + shakeX, 360 + shakeY);
+        // Warp from top
+        ctx.translate(0, -360);
+        ctx.scale(1 + (volRatio * 0.05), warpScaleY);
 
-        // Draw Top Half (Stationary)
-        ctx.save();
-        ctx.beginPath();
-        ctx.rect(0, 0, 720, 360);
-        ctx.clip();
-        ctx.drawImage(img, 0, 0, 720, 720);
+        ctx.drawImage(img, -360, 0, 720, 720);
         ctx.restore();
+        // ----------------------------------------
 
-        // Draw Bottom Half (Moving Down)
-        ctx.save();
-        ctx.translate(0, jawOffset);
-        ctx.beginPath();
-        ctx.rect(0, 360, 720, 360);
-        ctx.clip();
-        ctx.drawImage(img, 0, 0, 720, 720);
-        ctx.restore();
-
-        ctx.restore();
-        // ---------------------------
-
-        // Overlay Title
+        // Overlay Branding/Title
         ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
         ctx.font = "bold 24px monospace";
         ctx.textAlign = "right";

@@ -74,29 +74,30 @@ app.post("/api/analyze-scream", async (req, res) => {
     const targetLanguageName = isSv ? "Swedish (svenska)" : "English";
 
     const systemInstruction = `You are an expert fantasy worldbuilder, character designer, image prompt engineer, and psychologist.
-Your task is to analyze a human's scream vocal metrics and summon/manifest a highly distinct, creative entity that represents the soul and energy of that specific scream.
-
-NEW METRICS:
-- Pitch: ${safePitch}/100. High pitch = sharp, energy, ethereal, lightning. Low pitch = deep, ground, shadows, giants.
-- Stability: ${safeStability}/100. High stability = pure, solid, crystalline, divine. Low stability = glitchy, chaotic, eldritch, mist.
+Your task is to analyze a human's scream vocal metrics and summon/manifest a highly distinct, creative entity (creature, character, deity, or spirit) that represents the soul and energy of that specific scream.
 
 CRITICAL FOR VISUAL STYLE:
-- For Medium and High intensity (> 30%), DO NOT generate cartoonish, childish, or Pokemon-like styles. Instead, generate mature styles like 'gritty dark fantasy oil painting', 'epic cinematic concept art', 'futuristic cyberpunk illustration', 'gothic digital painting', or 'ancient mythological art'.
-- ALWAYS include high-quality tags like 'masterpiece', 'highly detailed', 'cinematic lighting', '8k resolution'.
-- STRICTLY FORBID: 'cartoon', 'anime' (unless it's gritty 90s style), 'flat colors', 'pokemon', 'chibi'.
-- The entity MUST be in a 'screaming' or 'roaring' pose with its mouth wide open.
+- FOR LOW INTENSITY (< 30%): The scream is more like a tiny peep, a soft sigh, or a cute yawn. Generate 'cute' and 'soft' styles like 'soft Ghibli-inspired watercolor', 'cute claymation', 'plush toy aesthetic', 'chibi fantasy art', or 'delicate storybook illustration'. For these, DO NOT forbid 'cute' or 'chibi'.
+- FOR MEDIUM AND HIGH INTENSITY (> 30%): The energy is powerful and raw. Generate mature styles like 'gritty dark fantasy oil painting', 'epic cinematic concept art', 'futuristic cyberpunk illustration', 'gothic digital painting', or 'ancient mythological art'.
+- FOR MEDIUM AND HIGH INTENSITY, STRICTLY FORBID: 'cartoon', 'anime', 'flat colors', 'pokemon', 'monster-collecting-game style', 'chibi', 'childish', 'low resolution'.
+- ALWAYS include high-quality tags like 'masterpiece', 'highly detailed', 'cinematic lighting', '8k resolution', 'photorealistic textures'.
 
 CRITICAL FOR EMOTION ANALYSIS:
-- provide a poetic analysis in ${targetLanguageName}. Do not use technical percentages. Speak metaphors.
+- You MUST provide a beautiful, poetic, and profound psychological/emotional analysis of the scream in the requested language: ${targetLanguageName}.
+- The analysis should interpret the duration, intensity, and volume as emotional energy (e.g. pent-up stress, roaring resilience, quiet melancholy, explosive relief, or divine focus).
+- DO NOT mention raw technical percentages or seconds in the analysis text. Speak poetically and metaphorically about the energy.
 
-Map the scream's metrics to the character:
-- Duration: size and age.
-- Intensity: emotional elements.
+Map the scream's physical metrics to the character:
+- Duration (seconds): Represents the entity's size, age, or cosmic presence. Very short (< 1.5s) could be a swift, impulsive spark, a cute baby creature (if low intensity), or a sudden magical flash. Medium (1.5s - 4.5s) could be an agile predator, a heroic warrior, or an active deity. Long (> 4.5s) could be a colossal titan, an ancient mountain spirit, or a legendary multi-headed cosmic dragon.
+- Intensity / Volume: Represents the emotional state, elements, and visual style.
+  * Low intensity (< 30%): gentle, whispering, melancholic, stealthy, cute, sleeping, or of elements like shadow, water, ice, soft wind, or starlight.
+  * Mid intensity (30% - 65%): active, battle-ready, mischievous, mechanical, or representing emerald earth, autumn wind, deep rocks, or green spirit flames.
+  * High intensity (> 65%): absolutely furious, explosive, divine, thunderous, or representing lightning, molten lava, cosmic supernova, or glowing solar energy.
 
-Provide a highly detailed prompt for an image generator. Add '--no pokemon, cartoon, anime, chibi, flat colors' at the end.`;
+Provide a highly detailed prompt for an image generator. Be very specific and unique! The creature/entity MUST be in a 'screaming' or 'roaring' pose (or a 'cute yawning/chirping' pose if low intensity) with its mouth wide open, capturing the raw energy of the sound. For Medium/High intensity, add '--no pokemon, cartoon, anime, chibi, childish, flat colors' at the end of every prompt.`;
 
     const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
+      model: "gemini-1.5-flash",
       contents: `Analyze this scream:
 - Duration: ${duration}s
 - Intensity: ${intensity}%

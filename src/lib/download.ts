@@ -36,7 +36,12 @@ export async function downloadMonsterCard(
       ctx.save();
       // Simple rounded corner clip
       ctx.beginPath();
-      ctx.roundRect(padding, padding, imgSize, imgSize, 40);
+      // Use roundRect if available, otherwise draw manual rect with curves
+      if (ctx.roundRect) {
+        ctx.roundRect(padding, padding, imgSize, imgSize, 40);
+      } else {
+        ctx.rect(padding, padding, imgSize, imgSize);
+      }
       ctx.clip();
       ctx.drawImage(img, padding, padding, imgSize, imgSize);
       ctx.restore();
