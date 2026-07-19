@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { motion } from 'motion/react';
 import { Play, Square, Save, RefreshCw, Sparkles, Volume2, Calendar, Clock, ChevronRight, Share2 } from 'lucide-react';
 import { ScreamRecord } from '../types';
@@ -202,9 +202,12 @@ export default function ResultScreen({ screamData, onSaveComplete, onScreamAgain
   };
 
   // Pollinations API image URL with random seed for guaranteed uniqueness
-  const seed = Math.floor(Math.random() * 1000000);
-  const encodedPrompt = encodeURIComponent(activeData.prompt);
-  const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=512&height=512&nologo=true&seed=${seed}`;
+  // We use useMemo to freeze the seed and URL so it doesn't change on every re-render
+  const imageUrl = useMemo(() => {
+    const seed = Math.floor(Math.random() * 1000000);
+    const encodedPrompt = encodeURIComponent(activeData.prompt);
+    return `https://image.pollinations.ai/prompt/${encodedPrompt}?width=512&height=512&nologo=true&seed=${seed}`;
+  }, [activeData.prompt]);
 
   // Create temporary audio URL for playback
   useEffect(() => {
@@ -384,6 +387,10 @@ export default function ResultScreen({ screamData, onSaveComplete, onScreamAgain
                 alt={activeData.title}
                 referrerPolicy="no-referrer"
                 onLoad={() => setImageLoaded(true)}
+                onError={() => {
+                  console.error("Failed to load image from Pollinations.ai");
+                  setImageLoaded(true); // Stop loading spinner even on error
+                }}
                 className={`w-full h-full object-cover transition-opacity duration-700 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
                 style={{
                   transform: isPlayingAudio 
