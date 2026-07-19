@@ -1,0 +1,6 @@
+{
+  "name": "The Scream App",
+  "description": "An emotional release app where you scream to release stress, visualize your voice in real time, and generate a unique monster avatar based on your scream's volume and duration.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
