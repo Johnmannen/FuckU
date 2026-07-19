@@ -201,9 +201,10 @@ export default function ResultScreen({ screamData, onSaveComplete, onScreamAgain
       : 'A deep release of pent-up energy. This scream carries a quiet storm filled with primal power.'
   };
 
-  // Pollinations API image URL
+  // Pollinations API image URL with random seed for guaranteed uniqueness
+  const seed = Math.floor(Math.random() * 1000000);
   const encodedPrompt = encodeURIComponent(activeData.prompt);
-  const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=512&height=512&nologo=true`;
+  const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=512&height=512&nologo=true&seed=${seed}`;
 
   // Create temporary audio URL for playback
   useEffect(() => {
@@ -422,9 +423,9 @@ export default function ResultScreen({ screamData, onSaveComplete, onScreamAgain
               </div>
             )}
 
-            {/* Emotion Analysis Overlap */}
+            {/* Emotion Analysis Overlap - Background set to opaque for screenshot stability */}
             {imageLoaded && !isAnalyzing && (
-              <div className="absolute bottom-3 left-3 right-3 bg-black/85 backdrop-blur-md rounded-2xl p-3 border border-white/10" id="emotion-analysis-box">
+              <div className="absolute bottom-3 left-3 right-3 bg-[#0D0D0D] rounded-2xl p-3 border border-white/10 shadow-2xl" id="emotion-analysis-box">
                 <p className="text-xs text-neutral-200 font-sans font-medium tracking-wide leading-relaxed text-center italic">
                   "{activeData.analysis}"
                 </p>

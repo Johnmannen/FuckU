@@ -145,22 +145,44 @@ export default function StartScreen({ onScreamRecorded, onNavigateToGallery }: S
           title = 'The Primal Scream';
         }
 
-        // Determine character details
-        let characterType = 'a cute small pokemon style creature';
+        // Determine character details with high variety
+        const archetypes = [
+          'An ethereal cosmic entity', 'A primal elemental force', 'A monumental divine titan',
+          'A gritty dark fantasy warrior', 'A bio-organic abyssal creature', 'A clockwork celestial automaton',
+          'A fractal crystal guardian', 'A volcanic obsidian behemoth', 'A shadowy void weaver',
+          'A cybernetic neon wraith', 'A mythological aether spirit', 'A tectonic stone giant',
+          'A spectral mist walker', 'A storm-forged thunder deity', 'A crystalline dragon shard',
+          'A parasitic fungal monarch', 'A radiant solar seraph', 'A withered ancient lich',
+          'A mercurial liquid metal form', 'A bioluminescent deep-sea terror'
+        ];
+
+        const styles = [
+          'intricate Baroque oil painting', 'hyper-detailed digital matte painting',
+          'cinematic 3D V-Ray render', 'dark gothic fine art', 'surrealist masterpiece with heavy textures',
+          'photorealistic epic fantasy art', 'futuristic cyberpunk neon illustration',
+          'ancient mythological stone engraving', 'ethereal watercolor dreamscape',
+          'gritty charcoal and ink sketch'
+        ];
+
+        // Randomly pick to ensure uniqueness even for same intensity/duration
+        const randomArchetype = archetypes[Math.floor(Math.random() * archetypes.length)];
+        const randomStyle = styles[Math.floor(Math.random() * styles.length)];
+
+        let characterType = `A ${randomArchetype}`;
         if (finalDuration >= 2 && finalDuration <= 4) {
-          characterType = 'a medium-sized humanoid battle creature, stylish fantasy avatar';
+          characterType = `A formidable ${randomArchetype.toLowerCase()}`;
         } else if (finalDuration > 4) {
-          characterType = 'a massive giant dragon-like boss monster, legendary status';
+          characterType = `A colossal and ancient ${randomArchetype.toLowerCase()}`;
         }
 
-        let characterStyle = 'whimpering, sad, soft blue and purple tones, gentle';
+        let intensityAdjective = 'whispering and subtle';
         if (finalIntensity >= 30 && finalIntensity <= 60) {
-          characterStyle = 'angry, fierce, orange and red flames, battle-ready';
+          intensityAdjective = 'resonant and surging';
         } else if (finalIntensity > 60) {
-          characterStyle = 'absolutely furious, screaming, lightning bolts, ultra-dramatic, neon red and yellow, epic cinematic';
+          intensityAdjective = 'explosive and world-shattering';
         }
 
-        const completePrompt = `${characterType}, ${characterStyle}, detailed digital art, high quality, dark dramatic background, clean portrait framing, fantasy illustration, cinematic composition`;
+        const completePrompt = `Masterpiece, 8k, highly detailed, photorealistic, cinematic lighting, intricate textures. ${characterType}, ${intensityAdjective}, in the style of ${randomStyle}. Dark atmospheric background, epic composition. --no pokemon, cartoon, anime, chibi, childish, flat colors`;
 
         onScreamRecorded({
           duration: Number(finalDuration.toFixed(2)),
@@ -169,7 +191,7 @@ export default function StartScreen({ onScreamRecorded, onNavigateToGallery }: S
           intensity: finalIntensity,
           title,
           characterType,
-          characterStyle,
+          characterStyle: randomStyle,
           prompt: completePrompt,
           audioBlob
         });
