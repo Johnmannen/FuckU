@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { ArrowLeft, Trash2, Play, Square, Volume2, Calendar, Clock, Sparkles, AlertTriangle, ShieldAlert, Share2, Download, LogIn, LogOut, User } from 'lucide-react';
 import { ScreamRecord, UserProfile } from '../types';
 import { getAllScreams, deleteScream } from '../lib/storage';
-import { downloadImage } from '../lib/download';
+import { downloadMonsterCard } from '../lib/download';
 import { auth } from '../lib/firebase';
 import ShareModal from './ShareModal';
 
@@ -401,7 +401,12 @@ export default function GalleryScreen({ user, onBackToStart, onLoginClick }: Gal
 
                   {/* Download Button */}
                   <button
-                    onClick={() => downloadImage(record.imageUrl, record.title)}
+                    onClick={() => downloadMonsterCard(record.imageUrl, record.title, {
+                      intensity: record.intensity,
+                      pitch: record.pitch || 50,
+                      stability: record.stability || 80,
+                      duration: record.duration
+                    }, record.analysis || '')}
                     className="w-9 h-9 rounded-full flex items-center justify-center bg-[#181818] border border-white/10 text-neutral-300 hover:text-white hover:border-red-500 transition-all cursor-pointer"
                     title="Ladda ner bild"
                     id={`btn-dl-${record.id}`}

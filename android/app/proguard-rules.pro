@@ -19,3 +19,8 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# Optimization is disabled by default in the old proguard-android.txt
+# R8 performs optimizations by default, but we can disable them here if needed
+# to replicate legacy behavior while troubleshooting.
+-dontoptimize

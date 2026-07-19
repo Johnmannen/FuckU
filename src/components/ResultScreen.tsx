@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import { Play, Square, Save, RefreshCw, Sparkles, Volume2, Calendar, Clock, ChevronRight, Share2, Download, LogIn, User } from 'lucide-react';
 import { ScreamRecord, UserProfile } from '../types';
 import { saveScream } from '../lib/storage';
-import { downloadImage } from '../lib/download';
+import { downloadMonsterCard } from '../lib/download';
 import { recordScreamVideo } from '../lib/videoExport';
 import { API_ENDPOINTS } from '../lib/api';
 import ShareModal from './ShareModal';
@@ -216,8 +216,14 @@ export default function ResultScreen({ screamData, user, onSaveComplete, onScrea
   const imageUrl = useMemo(() => {
     const seed = Math.floor(Math.random() * 1000000);
     const encodedPrompt = encodeURIComponent(activeData.prompt);
-    return `https://image.pollinations.ai/prompt/${encodedPrompt}?width=512&height=512&nologo=true&seed=${seed}`;
+    // Add a timestamp to ensure uniqueness across sessions if the prompt is identical
+    return `https://image.pollinations.ai/prompt/${encodedPrompt}?width=512&height=512&nologo=true&seed=${seed}&t=${Date.now()}`;
   }, [activeData.prompt]);
+
+  // Reset image loaded state when prompt changes to show the summoning loader
+  useEffect(() => {
+    setImageLoaded(false);
+  }, [imageUrl]);
 
   // Create temporary audio URL for playback
   useEffect(() => {
@@ -427,36 +433,49 @@ export default function ResultScreen({ screamData, user, onSaveComplete, onScrea
             id="avatar-image-frame"
           >
             
-            {/* Main Generated Image */}
+            {/* Main Generated Image with Split-Jaw Animation */}
             {!isAnalyzing && (
-              <img
-                src={imageUrl}
-                alt={activeData.title}
-                referrerPolicy="no-referrer"
-                onLoad={() => setImageLoaded(true)}
-                onError={() => {
-                  console.error("Failed to load image from Pollinations.ai");
-                  setImageLoaded(true); // Stop loading spinner even on error
-                }}
-                className={`w-full h-full object-cover transition-opacity duration-700 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
-                style={{
-                  transform: isPlayingAudio 
-                    ? `translate(${(Math.random() - 0.5) * (playbackVolume * 0.18)}px, ${(Math.random() - 0.5) * (playbackVolume * 0.18)}px)
-                       rotate(${(Math.random() - 0.5) * (playbackVolume * 0.05)}deg)
-                       scale(${1 + (playbackVolume * 0.0005)})
-                       scaleY(${1 + (playbackVolume * 0.0015)})`
-                    : 'translate(0px, 0px) rotate(0deg) scale(1) scaleY(1)',
-                  filter: isPlayingAudio
-                    ? `brightness(${1 + (playbackVolume * 0.008)})
-                       contrast(${1 + (playbackVolume * 0.004)})
-                       hue-rotate(${playbackVolume * 0.1}deg)
-                       ${playbackVolume > 70 ? `drop-shadow(${(Math.random() - 0.5) * 5}px 0px 2px rgba(255,0,0,0.5)) drop-shadow(${(Math.random() - 0.5) * -5}px 0px 2px rgba(0,255,255,0.5))` : ''}`
-                    : 'none',
-                  transformOrigin: 'top center', // Crucial for the jaw-drop effect
-                  transition: isPlayingAudio ? 'none' : 'transform 0.2s ease-out, filter 0.2s ease-out'
-                }}
-                id="generated-avatar-img"
-              />
+              <div className="relative w-full h-full overflow-hidden">
+                {/* Top Half (Stationary) */}
+                <div
+                  className="absolute inset-0 z-10"
+                  style={{
+                    clipPath: 'inset(0% 0% 50% 0%)',
+                    transform: isPlayingAudio
+                      ? `translate(${(Math.random() - 0.5) * (playbackVolume * 0.1)}px, ${(Math.random() - 0.5) * (playbackVolume * 0.1)}px)`
+                      : 'none'
+                  }}
+                >
+                  <img
+                    src={imageUrl}
+                    alt={activeData.title}
+                    referrerPolicy="no-referrer"
+                    onLoad={() => setImageLoaded(true)}
+                    className={`w-full h-full object-cover transition-opacity duration-700 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+                    filter={isPlayingAudio ? `brightness(${1 + (playbackVolume * 0.005)}) contrast(${1 + (playbackVolume * 0.002)})` : 'none'}
+                  />
+                </div>
+
+                {/* Bottom Half (Jaw Drop) */}
+                <div
+                  className="absolute inset-0 z-10"
+                  style={{
+                    clipPath: 'inset(50% 0% 0% 0%)',
+                    transform: isPlayingAudio
+                      ? `translate(${(Math.random() - 0.5) * (playbackVolume * 0.1)}px, ${playbackVolume * 0.25}px)`
+                      : 'none',
+                    transition: isPlayingAudio ? 'none' : 'transform 0.1s ease-out'
+                  }}
+                >
+                  <img
+                    src={imageUrl}
+                    alt={activeData.title}
+                    referrerPolicy="no-referrer"
+                    className={`w-full h-full object-cover transition-opacity duration-700 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+                    filter={isPlayingAudio ? `brightness(${1 + (playbackVolume * 0.005)}) contrast(${1 + (playbackVolume * 0.002)})` : 'none'}
+                  />
+                </div>
+              </div>
             )}
 
             {/* Loading Summoner Spinner */}
@@ -487,16 +506,22 @@ export default function ResultScreen({ screamData, user, onSaveComplete, onScrea
               </div>
             )}
 
-            {/* Emotion Analysis Overlap - Background set to opaque for screenshot stability */}
-            {imageLoaded && !isAnalyzing && (
-              <div className="absolute bottom-3 left-3 right-3 bg-[#0D0D0D] rounded-2xl p-3 border border-white/10 shadow-2xl" id="emotion-analysis-box">
-                <p className="text-xs text-neutral-200 font-sans font-medium tracking-wide leading-relaxed text-center italic">
-                  "{activeData.analysis}"
-                </p>
-              </div>
-            )}
+            {/* Emotion Analysis is now moved outside for cleaner view */}
           </div>
         </div>
+
+        {/* Emotion Analysis - Moved here for better visibility */}
+        {imageLoaded && !isAnalyzing && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-4 px-4 py-3 bg-[#111] border border-white/5 rounded-2xl max-w-md w-full"
+          >
+            <p className="text-xs text-neutral-300 font-sans font-medium tracking-wide leading-relaxed text-center italic">
+              "{activeData.analysis}"
+            </p>
+          </motion.div>
+        )}
 
         {/* Audio Player Row */}
         <div className="mt-5 w-full flex justify-center" id="voice-playback-row">
@@ -602,7 +627,12 @@ export default function ResultScreen({ screamData, user, onSaveComplete, onScrea
 
           {/* Download Button */}
           <button
-            onClick={() => downloadImage(imageUrl, activeData.title)}
+            onClick={() => downloadMonsterCard(imageUrl, activeData.title, {
+              intensity: screamData.intensity,
+              pitch: (screamData as any).pitch || 50,
+              stability: (screamData as any).stability || 80,
+              duration: screamData.duration
+            }, activeData.analysis || '')}
             disabled={!imageLoaded}
             className="w-14 py-4 rounded-2xl bg-[#1A1A1A] border border-white/10 flex items-center justify-center text-neutral-400 hover:text-white hover:border-red-500 transition-all cursor-pointer disabled:opacity-50"
             title="Ladda ner bild"

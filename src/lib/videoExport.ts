@@ -1,5 +1,5 @@
 /**
- * Utility to record an animated canvas + audio into an MP4/WebM video.
+ * Utility to record an animated "Split-Jaw" canvas + audio into an MP4/WebM video.
  */
 export async function recordScreamVideo(
   imageUrl: string,
@@ -9,20 +9,17 @@ export async function recordScreamVideo(
 ): Promise<Blob> {
   return new Promise(async (resolve, reject) => {
     try {
-      // 1. Setup Canvas
       const canvas = document.createElement('canvas');
-      canvas.width = 512;
-      canvas.height = 512;
+      canvas.width = 720;
+      canvas.height = 720;
       const ctx = canvas.getContext('2d');
       if (!ctx) throw new Error("Could not create canvas context");
 
-      // 2. Load Image
       const img = new Image();
       img.crossOrigin = "anonymous";
       img.src = imageUrl;
       await new Promise((res) => (img.onload = res));
 
-      // 3. Setup Audio for Analysis
       const audioUrl = URL.createObjectURL(audioBlob);
       const audio = new Audio(audioUrl);
       const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -33,10 +30,7 @@ export async function recordScreamVideo(
       analyser.connect(audioCtx.destination);
       const dataArray = new Uint8Array(analyser.frequencyBinCount);
 
-      // 4. Setup MediaRecorder
-      const stream = canvas.captureStream(30); // 30 FPS
-
-      // Mix audio into the stream
+      const stream = canvas.captureStream(30);
       const dest = audioCtx.createMediaStreamDestination();
       source.connect(dest);
       const audioTrack = dest.stream.getAudioTracks()[0];
@@ -51,7 +45,6 @@ export async function recordScreamVideo(
         resolve(videoBlob);
       };
 
-      // 5. Animation Loop
       const render = () => {
         if (audio.paused || audio.ended) {
           recorder.stop();
@@ -64,33 +57,47 @@ export async function recordScreamVideo(
         const volume = sum / dataArray.length;
         const volRatio = volume / 128;
 
-        // Clear and Draw
-        ctx.clearRect(0, 0, 512, 512);
+        ctx.fillStyle = "#0A0A0A";
+        ctx.fillRect(0, 0, 720, 720);
 
-        // Apply "Jaw Drop" effect to canvas draw
-        const jawStretch = 1 + (volRatio * 0.15);
-        const shakeX = (Math.random() - 0.5) * volRatio * 15;
-        const shakeY = (Math.random() - 0.5) * volRatio * 15;
+        // --- SPLIT-JAW ANIMATION ---
+        const jawOffset = volRatio * 40;
+        const shakeX = (Math.random() - 0.5) * volRatio * 10;
+        const shakeY = (Math.random() - 0.5) * volRatio * 10;
 
         ctx.save();
-        ctx.translate(256 + shakeX, 256 + shakeY);
-        // We simulate the jaw drop by drawing the top half normally and stretching the bottom
-        // Simplified: just scale the whole thing from top
-        ctx.translate(0, -256);
-        ctx.scale(1 + (volRatio * 0.05), jawStretch);
-        ctx.drawImage(img, -256, 0, 512, 512);
+        ctx.translate(shakeX, shakeY);
+
+        // Draw Top Half (Stationary)
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(0, 0, 720, 360);
+        ctx.clip();
+        ctx.drawImage(img, 0, 0, 720, 720);
         ctx.restore();
 
+        // Draw Bottom Half (Moving Down)
+        ctx.save();
+        ctx.translate(0, jawOffset);
+        ctx.beginPath();
+        ctx.rect(0, 360, 720, 360);
+        ctx.clip();
+        ctx.drawImage(img, 0, 0, 720, 720);
+        ctx.restore();
+
+        ctx.restore();
+        // ---------------------------
+
         // Overlay Title
-        ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
-        ctx.font = "bold 20px monospace";
-        ctx.fillText(title.toUpperCase(), 30, 480);
+        ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
+        ctx.font = "bold 24px monospace";
+        ctx.textAlign = "right";
+        ctx.fillText(title.toUpperCase(), 690, 690);
 
         onProgress(Math.min(99, (audio.currentTime / audio.duration) * 100));
         requestAnimationFrame(render);
       };
 
-      // Start
       recorder.start();
       audio.play();
       render();

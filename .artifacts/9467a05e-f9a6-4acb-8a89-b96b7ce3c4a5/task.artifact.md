@@ -1,7 +1,7 @@
-- `[/]` Ultimate Scream Experience - 1000+ Figurer & Videoexport
-  - `[ ]` Implementera fördjupad ljudanalys (Pitch, Stabilitet) i `StartScreen.tsx`
-  - `[ ]` Skapa det enorma biblioteket (1000+ figurer) i `fallbacks.ts`
-  - `[ ]` Uppdatera serverlogik för hybrid-system och nya variabler
-  - `[ ]` Bygg videoexport-funktionen (`videoExport.ts`)
-  - `[ ]` Lägg till "Spara som Video" i `ResultScreen.tsx`
-  - `[ ]` Synka, bygg och deploya till GitHub/Vercel
+- `[x]` Ultimate Scream Experience - 1000+ Figurer & Videoexport
+  - `[x]` Implementera fördjupad ljudanalys (Pitch, Stabilitet) i `StartScreen.tsx`
+  - `[x]` Skapa det enorma biblioteket (1000+ figurer) i `fallbacks.ts`
+  - `[x]` Uppdatera serverlogik för hybrid-system och nya variabler
+  - `[x]` Bygg videoexport-funktionen (`videoExport.ts`)
+  - `[x]` Lägg till "Spara som Video" i `ResultScreen.tsx`
+  - `[x]` Synka, bygg och deploya till GitHub/Vercel
